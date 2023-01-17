@@ -14,8 +14,8 @@ services:
     ports:
       - "8081:8081"
 
-  vanguard:
+  avanguard:
     build:
-      context: vanguard
+      context: avanguard
     ports:
       - "8080:8080"

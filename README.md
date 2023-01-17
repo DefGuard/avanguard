@@ -1,4 +1,4 @@
-# VanGuard OIDC identity service
+# AvanGuard OIDC identity service
 
 ## Development setup
 

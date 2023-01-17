@@ -9,8 +9,8 @@ FROM chef AS builder
 COPY --from=planner /build/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --bin vanguard
+RUN cargo build --release --bin avanguard
 
 FROM debian:bullseye-slim AS runtime
-COPY --from=builder /build/target/release/vanguard /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/vanguard"]
+COPY --from=builder /build/target/release/avanguard /usr/local/bin
+ENTRYPOINT ["/usr/local/bin/avanguard"]

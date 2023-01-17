@@ -2,7 +2,7 @@ use actix_web::{middleware, App, HttpServer};
 use anyhow::Result;
 use clap::Parser;
 use env_logger::Builder;
-use vanguard::{Config, config_service};
+use avanguard::{Config, config_service};
 use std::net::{IpAddr, Ipv4Addr};
 
 #[macro_use]
@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
     let config = Config::parse();
     Builder::new().filter_level(config.log_level).init();
 
-    info!("VanGuard HTTP server starting...");
+    info!("AvanGuard HTTP server starting...");
     HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
