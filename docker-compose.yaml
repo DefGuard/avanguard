@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  web:
+    build:
+      context: web
+    ports:
+      - "8000:80"
+
+  backend:
+    build:
+      context: backend
+    ports:
+      - "8081:8081"
+
+  vanguard:
+    build:
+      context: vanguard
+    ports:
+      - "8080:8080"
