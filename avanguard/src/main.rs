@@ -8,7 +8,7 @@ use std::net::{IpAddr, Ipv4Addr};
 #[macro_use]
 extern crate log;
 
-#[tokio::main]
+#[actix_web::main]
 async fn main() -> Result<()> {
     let config = Config::parse();
     Builder::new().filter_level(config.log_level).init();
