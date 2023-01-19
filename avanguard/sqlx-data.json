@@ -1,0 +1,57 @@
+{
+  "db": "PostgreSQL",
+  "06d3c7da5e9960965ed5a6ecd4989f35be6dd5dd2fcaf387fedb4bf3a52aac9b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "address",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "chain_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "challenge_message",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "challenge_signature",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "creation_timestamp",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "validation_timestamp",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id \"id?\", address, chain_id, challenge_message, challenge_signature, creation_timestamp, validation_timestamp FROM wallet"
+  }
+}

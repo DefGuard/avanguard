@@ -9,6 +9,7 @@ FROM chef AS builder
 COPY --from=planner /build/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
+ENV SQLX_OFFLINE true
 RUN cargo build --release --bin avanguard
 
 FROM debian:bullseye-slim AS runtime

@@ -11,5 +11,7 @@ anyhow = "1.0.68"
 clap = { version = "4.1.1", features = ["derive", "env"] }
 env_logger = "0.10.0"
 log = "0.4.17"
-sqlx = { version = "0.6.2", features = [ "runtime-actix-native-tls" , "postgres" ] }
+serde = { version = "1.0.152", features = ["derive"] }
+sqlx = { version = "0.6.2", features = ["runtime-actix-native-tls", "postgres", "time", "offline"] }
 thiserror = "1.0.38"
+time = { version = "0.3.17", features = ["serde"] }
