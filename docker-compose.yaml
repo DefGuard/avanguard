@@ -19,3 +19,20 @@ services:
       context: avanguard
     ports:
       - "8080:8080"
+    environment:
+      AG_DB_HOST: db
+      AG_DB_PORT: 5432
+      AG_DB_USER: avanguard
+      AG_DB_PASSWORD: avanguard
+      AG_DB_NAME: avanguard
+
+  db:
+    image: postgres:15.1-alpine3.17
+    environment:
+      POSTGRES_DB: avanguard
+      POSTGRES_USER: avanguard
+      POSTGRES_PASSWORD: avanguard
+    volumes:
+      - ./.volumes/db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
