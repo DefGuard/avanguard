@@ -1,4 +1,7 @@
-use actix_web::{ResponseError, HttpResponse, http::{header::ContentType, StatusCode}};
+use actix_web::{
+    http::{header::ContentType, StatusCode},
+    HttpResponse, ResponseError,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -49,4 +52,28 @@ impl ResponseError for ApiError {
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
+}
+
+#[derive(Debug, Error)]
+pub enum Web3Error {
+    #[error("hex decoding error")]
+    Decode,
+    #[error("invalid message")]
+    InvalidMessage,
+    #[error("invalid recovery id")]
+    InvalidRecoveryId,
+    #[error("error parsing signature")]
+    ParseSignature,
+    #[error("recovery error")]
+    Recovery,
+    #[error("error verifying address")]
+    VerifyAddress,
+}
+
+#[derive(Debug, Error, PartialEq)]
+pub enum HexError {
+    #[error("Invalid character {0}")]
+    InvalidCharacter(u8),
+    #[error("Invalid string length {0}")]
+    InvalidStringLength(usize),
 }
