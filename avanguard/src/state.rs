@@ -7,6 +7,6 @@ pub struct AppState {
 impl AppState {
     #[must_use]
     pub fn new(pool: DbPool) -> Self {
-        Self {pool}
+        Self { pool }
     }
 }

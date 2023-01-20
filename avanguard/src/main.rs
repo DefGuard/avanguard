@@ -1,8 +1,8 @@
 use actix_web::{middleware, web, App, HttpServer};
 use anyhow::Result;
+use avanguard::{config_service, db::init_db, state::AppState, Config};
 use clap::Parser;
 use env_logger::Builder;
-use avanguard::{Config, config_service, db::init_db, state::AppState};
 use std::net::{IpAddr, Ipv4Addr};
 
 #[macro_use]
