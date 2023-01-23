@@ -3,8 +3,9 @@ use crate::{
     db::DbPool,
     error::Web3Error,
     hex::{hex_decode, to_lower_hex},
-    now, CHALLENGE_TEMPLATE,
+    CHALLENGE_TEMPLATE,
 };
+use chrono::{NaiveDateTime, Utc};
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use model_derive::Model;
 use secp256k1::{
@@ -12,7 +13,6 @@ use secp256k1::{
     Message, Secp256k1,
 };
 use sqlx::{query, query_as};
-use time::PrimitiveDateTime;
 
 #[derive(Model, Serialize)]
 pub struct Wallet {
@@ -21,8 +21,8 @@ pub struct Wallet {
     pub chain_id: i64,
     pub challenge_message: String,
     pub challenge_signature: Option<String>,
-    pub creation_timestamp: PrimitiveDateTime,
-    pub validation_timestamp: Option<PrimitiveDateTime>,
+    pub creation_timestamp: NaiveDateTime,
+    pub validation_timestamp: Option<NaiveDateTime>,
 }
 
 impl Wallet {
@@ -35,7 +35,7 @@ impl Wallet {
             chain_id,
             challenge_message,
             challenge_signature: None,
-            creation_timestamp: now(),
+            creation_timestamp: Utc::now().naive_utc(),
             validation_timestamp: None,
         }
     }
@@ -80,7 +80,7 @@ impl Wallet {
         signature: &str,
     ) -> Result<(), sqlx::Error> {
         self.challenge_signature = Some(signature.into());
-        self.validation_timestamp = Some(now());
+        self.validation_timestamp = Some(Utc::now().naive_utc());
         if let Some(id) = self.id {
             query!(
                 "UPDATE wallet SET challenge_signature = $1, validation_timestamp = $2 WHERE id = $3",

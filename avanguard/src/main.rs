@@ -23,13 +23,14 @@ async fn main() -> Result<()> {
         &config.db_password,
     )
     .await;
+    let listen_port = config.listen_port;
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(AppState::new(pool.clone())))
+            .app_data(web::Data::new(AppState::new(config.clone(), pool.clone())))
             .wrap(middleware::Logger::default())
             .configure(config_service)
     })
-    .bind((IpAddr::V4(Ipv4Addr::UNSPECIFIED), config.listen_port))?
+    .bind((IpAddr::V4(Ipv4Addr::UNSPECIFIED), listen_port))?
     .run()
     .await?;
 

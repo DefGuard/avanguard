@@ -46,10 +46,10 @@ async fn init_test_db() -> (DbPool, Config) {
 
 /// Initializes actix App and creates a wallet for testing
 async fn init_app(wallet_address: &str) -> (App<impl ServiceFactory<ServiceRequest>>, Wallet) {
-    let (pool, _) = init_test_db().await;
+    let (pool, config) = init_test_db().await;
 
     let app = App::new()
-        .app_data(web::Data::new(AppState::new(pool.clone())))
+        .app_data(web::Data::new(AppState::new(config, pool.clone())))
         .wrap(middleware::Logger::default())
         .configure(config_service);
 
@@ -87,11 +87,11 @@ async fn test_challenge_signing() {
     // let (app, _) = init_app(&wallet_address).await;
 
     // TODO: remove after implementing init_app method
-    let (pool, _) = init_test_db().await;
+    let (pool, config) = init_test_db().await;
 
     let app = test::init_service(
         App::new()
-            .app_data(web::Data::new(AppState::new(pool.clone())))
+            .app_data(web::Data::new(AppState::new(config, pool.clone())))
             .wrap(middleware::Logger::default())
             .configure(config_service),
     )
