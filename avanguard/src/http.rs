@@ -16,10 +16,11 @@ pub struct WalletAddress {
     pub address: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct WalletSignature {
     pub address: String,
     pub signature: String,
+    pub nonce: String,
 }
 
 #[derive(Serialize, Deserialize)]
