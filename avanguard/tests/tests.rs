@@ -4,7 +4,7 @@ use actix_web::{
 };
 use avanguard::{
     config_service, crypto::keccak256, db::Wallet, state::AppState, Challenge, WalletAddress,
-    CHALLENGE_TEMPLATE,
+    WalletSignature, CHALLENGE_TEMPLATE,
 };
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use secp256k1::{rand::rngs::OsRng, Message, Secp256k1};
@@ -14,7 +14,6 @@ use avanguard::{
     Config,
 };
 use clap::Parser;
-use serde::Serialize;
 use sqlx::{postgres::PgConnectOptions, query, types::Uuid};
 
 /// Initializes & migrates database with random name for tests.
@@ -150,17 +149,12 @@ async fn test_challenge_signing() {
     sig_arr[0..64].copy_from_slice(&sig[0..64]);
     sig_arr[64] = rec_id.to_i32() as u8;
 
-    #[derive(Serialize)]
-    struct Signature {
-        address: String,
-        signature: String,
-    }
-
     let request = test::TestRequest::post()
         .uri("/auth")
-        .set_json(Signature {
+        .set_json(WalletSignature {
             address: wallet_address.clone(),
             signature: to_lower_hex(&sig_arr),
+            nonce: String::from("test"),
         })
         .to_request();
     let response = test::call_service(&app, request).await;

@@ -53,5 +53,240 @@
       }
     },
     "query": "SELECT id \"id?\", address, chain_id, challenge_message, challenge_signature, creation_timestamp, validation_timestamp FROM wallet"
+  },
+  "0a91b54c9076ba44cc03f8f0e32b225ecabc5ae1db8694d9d0edfea1e6eba56b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Text",
+          "Timestamp",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "UPDATE \"wallet\" SET \"address\" = $2, \"chain_id\" = $3, \"challenge_message\" = $4, \"challenge_signature\" = $5, \"creation_timestamp\" = $6, \"validation_timestamp\" = $7 WHERE id = $1"
+  },
+  "169a39acbf7e6b74fd9f538047b0af650fe1bfa21d844a216e80965011290412": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "DELETE FROM \"wallet\" WHERE id = $1"
+  },
+  "3380b262127a733edfd672afbc2bab5ba50355d95865693f29eb6b88d88443c2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8",
+          "Text",
+          "Text",
+          "Timestamp",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO \"wallet\" (\"address\", \"chain_id\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\") VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
+  },
+  "65ff6130ebcff9c2a8decfd4c735603bda81bbf790047dbb26eea4b269a51ee4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "address",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "chain_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "challenge_message",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "challenge_signature",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "creation_timestamp",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "validation_timestamp",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id \"id?\", \"address\", \"chain_id\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\" FROM \"wallet\""
+  },
+  "7e09e802d6cdb2332fcba8be9dae5873c274297c503064f423b6da5a15b4756e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "address",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "chain_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "challenge_message",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "challenge_signature",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "creation_timestamp",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "validation_timestamp",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id \"id?\", \"address\", \"chain_id\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\" FROM \"wallet\" WHERE id = $1"
+  },
+  "c986fca7c7934b5fa00fd585ed568719b9c32652f2fa642205c8fc3cf61034e8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "address",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "chain_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "challenge_message",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "challenge_signature",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "creation_timestamp",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "validation_timestamp",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id \"id?\", address, chain_id, challenge_message, challenge_signature, creation_timestamp, validation_timestamp FROM wallet WHERE address = $1"
+  },
+  "f5a52d311dd0ac4c76cf1638f30cffd8c97fe2b4987fcfb9f9ca523ab6e5bf5d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Timestamp",
+          "Int8"
+        ]
+      }
+    },
+    "query": "UPDATE wallet SET challenge_signature = $1, validation_timestamp = $2 WHERE id = $3"
   }
 }

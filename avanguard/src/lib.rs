@@ -4,7 +4,7 @@ pub mod crypto;
 pub mod db;
 mod error;
 mod http;
-pub use http::{config_service, Challenge, WalletAddress};
+pub use http::{config_service, Challenge, WalletAddress, WalletSignature};
 use time::{OffsetDateTime, PrimitiveDateTime};
 pub mod hex;
 pub mod state;
