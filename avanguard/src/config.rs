@@ -1,8 +1,18 @@
 use clap::Parser;
 use log::LevelFilter;
+use openidconnect::url::Url;
 
 #[derive(Clone, Parser)]
 pub struct Config {
+    #[clap(long, env = "AG_ISSUER_URL", value_parser = Url::parse, default_value = "http://localhost:8080")]
+    pub issuer_url: Url,
+
+    #[clap(long, env = "AG_CLIENT_ID", default_value = "client_id")]
+    pub client_id: String,
+
+    #[clap(long, env = "AG_CLIENT_SECRET", default_value = "client_secret")]
+    pub client_secret: String,
+
     #[clap(long, env = "AG_LISTEN_PORT", default_value_t = 8080)]
     pub listen_port: u16,
 
