@@ -156,10 +156,15 @@ async fn test_challenge_signing() {
         signature: String,
     }
 
-    // TODO: post signature, assert response.is_success
-    // let request = test::TestRequest::post().uri("/auth").set_json(Signature {address: wallet_address.clone(), signature: to_lower_hex(&sig_arr)}).to_request();
-    // let response = test::call_service(&app, request).await;
-    // assert!(response.status().is_success());
+    let request = test::TestRequest::post()
+        .uri("/auth")
+        .set_json(Signature {
+            address: wallet_address.clone(),
+            signature: to_lower_hex(&sig_arr),
+        })
+        .to_request();
+    let response = test::call_service(&app, request).await;
+    assert!(response.status().is_success());
 
     // TODO: validate OIDC token
 }

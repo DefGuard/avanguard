@@ -8,18 +8,26 @@ use thiserror::Error;
 pub enum ApiError {
     #[error("sqlx error")]
     Sqlx(#[from] sqlx::Error),
+    #[error("wallet not found")]
+    WalletNotFound,
+    #[error("signature incorrect")]
+    SignatureIncorrect,
 }
 
 impl ApiError {
     pub fn code(&self) -> &str {
         match self {
             Self::Sqlx(_) => "DB",
+            Self::WalletNotFound => "WalletNotFound",
+            Self::SignatureIncorrect => "SignatureIncorrect",
         }
     }
 
     pub fn message(&self) -> String {
         match self {
-            Self::Sqlx(e) => e.to_string(),
+            Self::Sqlx(_) => String::from("Internal error"),
+            Self::WalletNotFound => String::from("Wallet not found"),
+            Self::SignatureIncorrect => String::from("Signature incorrect"),
         }
     }
 }
@@ -50,6 +58,8 @@ impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::WalletNotFound => StatusCode::UNAUTHORIZED,
+            ApiError::SignatureIncorrect => StatusCode::UNAUTHORIZED,
         }
     }
 }

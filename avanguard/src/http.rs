@@ -4,7 +4,7 @@ use actix_web::{
 };
 use sqlx::query_as;
 
-use crate::{db::Wallet, error::ApiError, state::AppState, CHALLENGE_TEMPLATE};
+use crate::{db::Wallet, error::ApiError, state::AppState};
 
 #[derive(Serialize, Deserialize)]
 pub struct Challenge {
@@ -14,6 +14,17 @@ pub struct Challenge {
 #[derive(Serialize, Deserialize)]
 pub struct WalletAddress {
     pub address: String,
+}
+
+#[derive(Deserialize)]
+pub struct WalletSignature {
+    pub address: String,
+    pub signature: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct IdToken {
+    pub token: String,
 }
 
 /// Simple HTTP server health check.
@@ -32,7 +43,7 @@ async fn list_wallets(app_state: web::Data<AppState>) -> Result<Json<Vec<Wallet>
     Ok(Json(wallets))
 }
 
-/// Start Web3 authentication
+/// Start Web3 authentication. Returns challenge message for specified wallet address.
 #[post("/auth/start")]
 pub async fn web3auth_start(
     app_state: web::Data<AppState>,
@@ -55,63 +66,29 @@ pub async fn web3auth_start(
     }))
 }
 
-// TODO:
-// /// Finish Web3 authentication
-// #[post("/auth", format = "json", data = "<signature>")]
-// pub async fn web3auth_end(
-//     mut session: Session,
-//     appstate: &State<AppState>,
-//     signature: Json<WalletSignature>,
-//     cookies: &CookieJar<'_>,
-// ) -> ApiResult {
-//     if let Some(ref challenge) = session.web3_challenge {
-//         if let Some(wallet) =
-//             Wallet::find_by_user_and_address(&appstate.pool, session.user_id, &signature.address)
-//                 .await?
-//         {
-//             if wallet.use_for_mfa {
-//                 return match wallet.verify_address(challenge, &signature.signature) {
-//                     Ok(true) => {
-//                         session
-//                             .set_state(&appstate.pool, SessionState::MultiFactorVerified)
-//                             .await?;
-//                         if let Some(user) =
-//                             User::find_by_id(&appstate.pool, session.user_id).await?
-//                         {
-//                             let user_info = UserInfo::from_user(&appstate.pool, user).await?;
-//                             if let Some(openid_cookie) = cookies.get("known_sign_in") {
-//                                 Ok(ApiResponse {
-//                                     json: json!(AuthResponse {
-//                                         user: user_info,
-//                                         url: Some(openid_cookie.value().to_string())
-//                                     }),
-//                                     status: Status::Ok,
-//                                 })
-//                             } else {
-//                                 Ok(ApiResponse {
-//                                     json: json!(AuthResponse {
-//                                         user: user_info,
-//                                         url: None,
-//                                     }),
-//                                     status: Status::Ok,
-//                                 })
-//                             }
-//                         } else {
-//                             Ok(ApiResponse::default())
-//                         }
-//                     }
-//                     _ => Err(OriWebError::Authorization("Signature not verified".into())),
-//                 };
-//             }
-//         }
-//     }
-//     Err(OriWebError::Http(Status::BadRequest))
-// }
+/// Finish Web3 authentication. Verifies signature and returns OIDC id_token if correct.
+#[post("/auth")]
+pub async fn web3auth_end(
+    app_state: web::Data<AppState>,
+    signature: Json<WalletSignature>,
+) -> Result<Json<IdToken>, ApiError> {
+    let wallet = match Wallet::find_by_address(&app_state.pool, &signature.address).await? {
+        Some(wallet) => wallet,
+        None => return Err(ApiError::WalletNotFound),
+    };
+    match wallet.verify_address(&wallet.challenge_message, &signature.signature) {
+        Ok(true) => Ok(Json(IdToken {
+            token: String::from("TODO"),
+        })),
+        _ => Err(ApiError::SignatureIncorrect),
+    }
+}
 
 /// Configure Actix Web server.
 pub fn config_service(config: &mut web::ServiceConfig) {
     config
         .service(health_check)
         .service(list_wallets)
-        .service(web3auth_start);
+        .service(web3auth_start)
+        .service(web3auth_end);
 }
