@@ -1,9 +1,9 @@
-import { useAccount } from 'wagmi'
+import { useAccount } from 'wagmi';
 
-import { Account, Connect, NetworkSwitcher } from './components'
+import { Account, Connect, NetworkSwitcher, Login } from './components';
 
 export function App() {
-  const { isConnected } = useAccount()
+  const { isConnected } = useAccount();
 
   return (
     <>
@@ -14,9 +14,10 @@ export function App() {
       {isConnected && (
         <>
           <Account />
+          <Login />
           <NetworkSwitcher />
         </>
       )}
     </>
-  )
+  );
 }
