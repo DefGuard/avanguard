@@ -1,18 +1,20 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
-export function Connect() {
-  const { connector, isConnected } = useAccount()
+export const Connect = () => {
+  const { connector, isConnected } = useAccount();
   const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect()
-  const { disconnect } = useDisconnect()
+    useConnect();
+  const { disconnect } = useDisconnect();
 
   return (
     <div>
       <div>
         {isConnected && (
-          <button onClick={() => disconnect()}>
-            Disconnect from {connector?.name}
-          </button>
+          <>
+            <button onClick={() => disconnect()}>
+              Disconnect from {connector?.name}
+            </button>
+          </>
         )}
 
         {connectors
@@ -27,5 +29,5 @@ export function Connect() {
 
       {error && <div>{error.message}</div>}
     </div>
-  )
-}
+  );
+};
