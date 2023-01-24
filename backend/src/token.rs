@@ -21,7 +21,7 @@ pub async fn validate_token_response(
         &DecodingKey::from_secret(config.client_secret.as_ref()),
         &Validation::new(Algorithm::HS256),
     )
-    .unwrap();
+    .map_err(|_| ())?;
 
     if token_message.claims.nonce != nonce {
         return Err(());

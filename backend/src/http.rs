@@ -4,6 +4,7 @@ use crate::{
 };
 
 use actix_web::{
+    error::ErrorUnauthorized,
     get, post,
     web::{self, Json},
     HttpResponse, Responder,
@@ -35,7 +36,7 @@ async fn validate_token(
 ) -> Result<Json<Claims>, actix_web::Error> {
     let token_claims = validate_token_response(&app_state.config, &data.token, &data.nonce)
         .await
-        .unwrap();
+        .map_err(|_| ErrorUnauthorized("JWT invalid"))?;
     Ok(Json(token_claims))
 }
 
