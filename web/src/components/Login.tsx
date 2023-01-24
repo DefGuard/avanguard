@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import ReactJson from 'react-json-view';
 import { useAccount, useSignTypedData } from 'wagmi';
 
 import { useApi } from '../shared/hooks/useApi';
@@ -96,12 +97,10 @@ export const Login = () => {
             Sign in with {connector?.name}
           </button>
           {claims ? (
-            <h2>
-              {' '}
-              {`Succesfully decoded and validated token: ${JSON.stringify(
-                claims
-              )}`}
-            </h2>
+            <>
+              <h2>Succesfully decoded and validated token</h2>
+              <ReactJson src={claims} />
+            </>
           ) : null}
         </>
       ) : null}

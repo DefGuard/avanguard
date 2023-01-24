@@ -14,8 +14,8 @@ export function App() {
       {isConnected && (
         <>
           <Account />
-          <Login />
           <NetworkSwitcher />
+          <Login />
         </>
       )}
     </>
