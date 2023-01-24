@@ -1,17 +1,15 @@
-import { configureChains, createClient } from 'wagmi'
-import { goerli, mainnet } from 'wagmi/chains'
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
-import { InjectedConnector } from 'wagmi/connectors/injected'
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
-import { publicProvider } from 'wagmi/providers/public'
+import { configureChains, createClient } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
+import { InjectedConnector } from 'wagmi/connectors/injected';
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+import { publicProvider } from 'wagmi/providers/public';
 
 const { chains, provider, webSocketProvider } = configureChains(
   [mainnet],
-  [
-    publicProvider(),
-  ],
-)
+  [publicProvider()]
+);
 
 export const client = createClient({
   autoConnect: true,
@@ -39,4 +37,4 @@ export const client = createClient({
   ],
   provider,
   webSocketProvider,
-})
+});

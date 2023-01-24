@@ -61,7 +61,9 @@ const createNonce = (length: number): string => {
 
 export const Login = () => {
   const { connector, isConnected, address } = useAccount();
-  const { getWalletChallenge, login } = useAvanguardApi();
+  const { getWalletChallenge, login } = useAvanguardApi({
+    baseURL: import.meta.env.PROD ? import.meta.env.VITE_AVANGUARD_URL : '',
+  });
   const { verifyToken } = useApi();
   const { signTypedDataAsync } = useSignTypedData();
   const [claims, setClaims] = useState<Claims>();
