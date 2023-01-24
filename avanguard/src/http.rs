@@ -149,9 +149,7 @@ pub async fn web3auth_end(
                 None,
                 &signature.nonce,
                 &app_state.config.client_id,
-            )
-            // TODO: handle JWT error
-            .unwrap();
+            )?;
             wallet.challenge_signature = Some(signature.signature.clone());
             wallet.save(&app_state.pool).await?;
             Ok(Json(JwtToken {

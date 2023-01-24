@@ -13,6 +13,13 @@ pub struct Config {
     #[clap(long, env = "AG_CLIENT_SECRET", default_value = "client_secret")]
     pub client_secret: String,
 
+    #[clap(
+        long,
+        env = "AG_CLIENT_ORIGIN_URL",
+        default_value = "http://localhost:8000"
+    )]
+    pub client_origin_url: String,
+
     #[clap(long, env = "AG_LISTEN_PORT", default_value_t = 8080)]
     pub listen_port: u16,
 
