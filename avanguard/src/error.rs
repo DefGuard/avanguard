@@ -2,6 +2,7 @@ use actix_web::{
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
 };
+use openidconnect::JsonWebTokenError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -12,6 +13,8 @@ pub enum ApiError {
     WalletNotFound,
     #[error("signature incorrect")]
     SignatureIncorrect,
+    #[error("signing error")]
+    SigningError(#[from] JsonWebTokenError),
 }
 
 impl ApiError {
@@ -20,6 +23,7 @@ impl ApiError {
             Self::Sqlx(_) => "DB",
             Self::WalletNotFound => "WalletNotFound",
             Self::SignatureIncorrect => "SignatureIncorrect",
+            Self::SigningError(_) => "SignatureIncorrect",
         }
     }
 
@@ -28,6 +32,7 @@ impl ApiError {
             Self::Sqlx(_) => String::from("Internal error"),
             Self::WalletNotFound => String::from("Wallet not found"),
             Self::SignatureIncorrect => String::from("Signature incorrect"),
+            Self::SigningError(_) => String::from("Signing error"),
         }
     }
 }
@@ -60,6 +65,7 @@ impl ResponseError for ApiError {
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::WalletNotFound => StatusCode::UNAUTHORIZED,
             ApiError::SignatureIncorrect => StatusCode::UNAUTHORIZED,
+            ApiError::SigningError(_) => StatusCode::UNAUTHORIZED,
         }
     }
 }
