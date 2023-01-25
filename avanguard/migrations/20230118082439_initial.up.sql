@@ -4,6 +4,5 @@ CREATE TABLE "wallet" (
     challenge_message text NOT NULL,
     challenge_signature text NULL,
     creation_timestamp timestamp without time zone NOT NULL,
-    validation_timestamp timestamp without time zone NULL,
-    chain_id bigint NOT NULL DEFAULT 0
+    validation_timestamp timestamp without time zone NULL
 );

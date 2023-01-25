@@ -25,7 +25,6 @@ To obtain JWT token from Avanguard, you'll have to:
 ```typescript
 interface WalletChallengeRequest {
   address: string;
-  chainId?: number;
 }
 
 interface WalletChallenge {

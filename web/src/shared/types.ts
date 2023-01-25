@@ -1,6 +1,5 @@
 export interface WalletChallengeRequest {
   address: string;
-  chainId?: number;
 }
 
 export interface LoginResponse {

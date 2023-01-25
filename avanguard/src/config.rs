@@ -37,22 +37,52 @@ pub struct Config {
     )]
     pub client_origin_url: String,
 
-    #[clap(long, env = "AG_LISTEN_PORT", default_value_t = 8080, help = "REST API listen port")]
+    #[clap(
+        long,
+        env = "AG_LISTEN_PORT",
+        default_value_t = 8080,
+        help = "REST API listen port"
+    )]
     pub listen_port: u16,
 
-    #[clap(long, env = "AG_DB_HOST", default_value = "localhost", help = "Database host")]
+    #[clap(
+        long,
+        env = "AG_DB_HOST",
+        default_value = "localhost",
+        help = "Database host"
+    )]
     pub db_host: String,
 
-    #[clap(long, env = "AG_DB_PORT", default_value_t = 5432, help = "Database port")]
+    #[clap(
+        long,
+        env = "AG_DB_PORT",
+        default_value_t = 5432,
+        help = "Database port"
+    )]
     pub db_port: u16,
 
-    #[clap(long, env = "AG_DB_NAME", default_value = "avanguard", help = "Database name")]
+    #[clap(
+        long,
+        env = "AG_DB_NAME",
+        default_value = "avanguard",
+        help = "Database name"
+    )]
     pub db_name: String,
 
-    #[clap(long, env = "AG_DB_USER", default_value = "avanguard", help = "Database user")]
+    #[clap(
+        long,
+        env = "AG_DB_USER",
+        default_value = "avanguard",
+        help = "Database user"
+    )]
     pub db_user: String,
 
-    #[clap(long, env = "AG_DB_PASSWORD", default_value = "", help = "Database password")]
+    #[clap(
+        long,
+        env = "AG_DB_PASSWORD",
+        default_value = "",
+        help = "Database password"
+    )]
     pub db_password: String,
 
     #[clap(long, env = "AG_LOG_LEVEL", default_value_t = LevelFilter::Info, help = "Log level")]

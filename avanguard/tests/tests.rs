@@ -53,7 +53,7 @@ async fn init_app(wallet_address: &str) -> (App<impl ServiceFactory<ServiceReque
         .wrap(middleware::Logger::default())
         .configure(config_service);
 
-    let mut wallet = Wallet::new(wallet_address.to_owned(), 1);
+    let mut wallet = Wallet::new(wallet_address.to_owned());
     wallet.save(&pool).await.unwrap();
     (app, wallet)
 }
@@ -97,7 +97,7 @@ async fn test_challenge_signing() {
     )
     .await;
 
-    let mut wallet = Wallet::new(wallet_address.to_owned(), 1);
+    let mut wallet = Wallet::new(wallet_address.to_owned());
     wallet.save(&pool).await.unwrap();
 
     let request = test::TestRequest::post()

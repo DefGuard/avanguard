@@ -49,7 +49,7 @@ async fn health_check() -> &'static str {
 async fn list_wallets(app_state: web::Data<AppState>) -> Result<Json<Vec<Wallet>>, ApiError> {
     let wallets = query_as!(
         Wallet,
-        "SELECT id \"id?\", address, chain_id, challenge_message, challenge_signature, creation_timestamp, validation_timestamp FROM wallet"
+        "SELECT id \"id?\", address, challenge_message, challenge_signature, creation_timestamp, validation_timestamp FROM wallet"
     ).fetch_all(&app_state.pool).await?;
     Ok(Json(wallets))
 }
@@ -64,9 +64,8 @@ pub async fn web3auth_start(
     let address = data.into_inner();
     let mut wallet = match Wallet::find_by_address(&app_state.pool, &address.address).await? {
         Some(wallet) => wallet,
-        // TODO get actual wallet chain_id
         None => {
-            let mut wallet = Wallet::new(address.address.clone(), 1);
+            let mut wallet = Wallet::new(address.address.clone());
             wallet.save(&app_state.pool).await?;
             wallet
         }

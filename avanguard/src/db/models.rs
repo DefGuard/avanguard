@@ -18,7 +18,6 @@ use sqlx::{query, query_as};
 pub struct Wallet {
     pub(crate) id: Option<i64>,
     pub address: String,
-    pub chain_id: i64,
     pub challenge_message: String,
     pub challenge_signature: Option<String>,
     pub creation_timestamp: NaiveDateTime,
@@ -27,12 +26,11 @@ pub struct Wallet {
 
 impl Wallet {
     #[must_use]
-    pub fn new(address: String, chain_id: i64) -> Self {
+    pub fn new(address: String) -> Self {
         let challenge_message = Self::format_challenge(&address, CHALLENGE_TEMPLATE);
         Self {
             id: None,
             address,
-            chain_id,
             challenge_message,
             challenge_signature: None,
             creation_timestamp: Utc::now().naive_utc(),
@@ -130,7 +128,7 @@ impl Wallet {
     ) -> Result<Option<Self>, sqlx::Error> {
         query_as!(
             Self,
-            "SELECT id \"id?\", address, chain_id, challenge_message, challenge_signature, \
+            "SELECT id \"id?\", address, challenge_message, challenge_signature, \
             creation_timestamp, validation_timestamp FROM wallet \
             WHERE address = $1",
             address
@@ -162,7 +160,7 @@ mod test {
             "0x47d3eddfb2ed3ad1776c704fbe90737286ede2931c9e561abe6ce33606f411a00eafc25ec540e5db7ea82364e7df1e4722a916a828f02746a28773ae0e7bf3f31b"),
         ] {
             let message =  Wallet::format_challenge(address, CHALLENGE_TEMPLATE);
-            let wallet = Wallet::new(address.into(), 1);
+            let wallet = Wallet::new(address.into());
             let result = wallet.verify_address(
                 &message,
                 signature,
