@@ -1,9 +1,10 @@
 use actix_web::{middleware, test, web, App};
 use avanguard::{
-    config_service, crypto::keccak256, db::Wallet, state::AppState, Challenge, WalletAddress,
-    WalletSignature, CHALLENGE_TEMPLATE,
+    config_service, crypto::keccak256, db::Wallet, state::AppState, Challenge, JwtToken,
+    WalletAddress, WalletSignature, CHALLENGE_TEMPLATE,
 };
 use ethers::types::transaction::eip712::{Eip712, TypedData};
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use secp256k1::{rand::rngs::OsRng, Message, Secp256k1};
 
 use avanguard::{
@@ -11,7 +12,17 @@ use avanguard::{
     Config,
 };
 use clap::Parser;
+use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnectOptions, query, types::Uuid};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub iss: String,
+    pub sub: String,
+    pub aud: Vec<String>,
+    pub exp: i64,
+    pub nonce: String,
+}
 
 /// Initializes & migrates database with random name for tests.
 async fn init_test_db() -> (DbPool, Config) {
@@ -43,6 +54,7 @@ async fn init_test_db() -> (DbPool, Config) {
 
 #[actix_web::test]
 async fn test_challenge_signing() {
+    // Create wallet public & private keys
     let secp = Secp256k1::new();
     let (secret_key, public_key) = secp.generate_keypair(&mut OsRng);
 
@@ -60,17 +72,17 @@ async fn test_challenge_signing() {
         });
         hex
     }
-    // create eth wallet address
+    // Derive wallet address from public key
     let public_key = public_key.serialize_uncompressed();
     let hash = keccak256(&public_key[1..]);
     let addr = &hash[hash.len() - 20..];
     let wallet_address = to_lower_hex(addr);
 
+    // Initialize database and web application and store wallet in DB
     let (pool, config) = init_test_db().await;
-
     let app = test::init_service(
         App::new()
-            .app_data(web::Data::new(AppState::new(config, pool.clone())))
+            .app_data(web::Data::new(AppState::new(config.clone(), pool.clone())))
             .wrap(middleware::Logger::default())
             .configure(config_service),
     )
@@ -79,6 +91,7 @@ async fn test_challenge_signing() {
     let mut wallet = Wallet::new(wallet_address.to_owned());
     wallet.save(&pool).await.unwrap();
 
+    // Retrieve challenge from API, ensure it's correct
     let request = test::TestRequest::post()
         .uri("/auth/start")
         .set_json(WalletAddress {
@@ -116,7 +129,7 @@ async fn test_challenge_signing() {
     .collect::<String>();
     assert_eq!(challenge.challenge, message);
 
-    // Sign message
+    // Sign the challenge
     let typed_data: TypedData = serde_json::from_str(&message).unwrap();
     let hash_msg = typed_data.encode_eip712().unwrap();
     let message = Message::from_slice(&hash_msg).unwrap();
@@ -128,6 +141,7 @@ async fn test_challenge_signing() {
     sig_arr[0..64].copy_from_slice(&sig[0..64]);
     sig_arr[64] = rec_id.to_i32() as u8;
 
+    // POST signed challenge, retrieve JWT token and ensure it's correct
     let request = test::TestRequest::post()
         .uri("/auth")
         .set_json(WalletSignature {
@@ -136,8 +150,11 @@ async fn test_challenge_signing() {
             nonce: String::from("test"),
         })
         .to_request();
-    let response = test::call_service(&app, request).await;
-    assert!(response.status().is_success());
-
-    // TODO: validate OIDC token
+    let token: JwtToken = test::call_and_read_body_json(&app, request).await;
+    assert!(decode::<Claims>(
+        &token.token,
+        &DecodingKey::from_secret(config.client_secret.as_ref()),
+        &Validation::new(Algorithm::HS256),
+    )
+    .is_ok());
 }
