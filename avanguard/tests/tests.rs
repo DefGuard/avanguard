@@ -1,7 +1,4 @@
-use actix_web::{
-    dev::{ServiceFactory, ServiceRequest},
-    middleware, test, web, App,
-};
+use actix_web::{middleware, test, web, App};
 use avanguard::{
     config_service, crypto::keccak256, db::Wallet, state::AppState, Challenge, WalletAddress,
     WalletSignature, CHALLENGE_TEMPLATE,
@@ -44,20 +41,6 @@ async fn init_test_db() -> (DbPool, Config) {
     (pool, config)
 }
 
-/// Initializes actix App and creates a wallet for testing
-async fn init_app(wallet_address: &str) -> (App<impl ServiceFactory<ServiceRequest>>, Wallet) {
-    let (pool, config) = init_test_db().await;
-
-    let app = App::new()
-        .app_data(web::Data::new(AppState::new(config, pool.clone())))
-        .wrap(middleware::Logger::default())
-        .configure(config_service);
-
-    let mut wallet = Wallet::new(wallet_address.to_owned());
-    wallet.save(&pool).await.unwrap();
-    (app, wallet)
-}
-
 #[actix_web::test]
 async fn test_challenge_signing() {
     let secp = Secp256k1::new();
@@ -83,10 +66,6 @@ async fn test_challenge_signing() {
     let addr = &hash[hash.len() - 20..];
     let wallet_address = to_lower_hex(addr);
 
-    // TODO
-    // let (app, _) = init_app(&wallet_address).await;
-
-    // TODO: remove after implementing init_app method
     let (pool, config) = init_test_db().await;
 
     let app = test::init_service(
