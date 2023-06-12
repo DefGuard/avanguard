@@ -1,4 +1,7 @@
 FROM node:19.4.0-alpine3.16 AS builder
+
+RUN apk add git
+
 WORKDIR /build
 
 COPY ./package.json ./pnpm-lock.yaml ./
