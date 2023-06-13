@@ -1,0 +1,72 @@
+name: Avanguard Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "avanguard/**"
+      - ".github/workflows/test.yaml"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: self-hosted
+    container: rust:latest
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: defguard
+          POSTGRES_USER: defguard
+          POSTGRES_PASSWORD: defguard
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Debug
+        run: echo ${{ github.ref_name }}
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt clippy
+      - name: Lint Avanguard
+        working-directory: avanguard
+        run: |
+          cargo fmt -- --check && cargo clippy -- --deny warnings
+      - name: Lint Backend
+        working-directory: backend
+        run: |
+          cargo fmt -- --check && cargo clippy -- --deny warnings
+      - name: Run tests
+        working-directory: avanguard
+        env:
+          AG_DB_HOST: postgres
+          AG_DB_PORT: 5432
+          AG_DB_NAME: defguard
+          AG_DB_USER: defguard
+          AG_DB_PASSWORD: defguard
+          DATABASE_URL: "postgresql://defguard:defguard@postgres/defguard"
+          SQLX_OFFLINE: true
+        run: cargo test --locked --no-fail-fast
