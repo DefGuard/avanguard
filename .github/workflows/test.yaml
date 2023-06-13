@@ -48,10 +48,17 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Check format
+      - name: Install Rust Components
         run: |
-          rustup component add rustfmt
-          cargo fmt -- --check
+          rustup component add rustfmt clippy
+      - name: Lint Avanguard
+        working-directory: avanguard
+        run: |
+          cargo fmt -- --check && cargo clippy -- --deny warnings
+      - name: Lint Backend
+        working-directory: backend
+        run: |
+          cargo fmt -- --check && cargo clippy -- --deny warnings
       - name: Run tests
         env:
           DEFGUARD_DB_HOST: postgres
