@@ -60,12 +60,13 @@ jobs:
         run: |
           cargo fmt -- --check && cargo clippy -- --deny warnings
       - name: Run tests
+        working-directory: avanguard
         env:
-          DEFGUARD_DB_HOST: postgres
-          DEFGUARD_DB_PORT: 5432
-          DEFGUARD_DB_NAME: defguard
-          DEFGUARD_DB_USER: defguard
-          DEFGUARD_DB_PASSWORD: defguard
+          AG_DB_HOST: postgres
+          AG_DB_PORT: 5432
+          AG_DB_NAME: defguard
+          AG_DB_USER: defguard
+          AG_DB_PASSWORD: defguard
           DATABASE_URL: "postgresql://defguard:defguard@postgres/defguard"
           SQLX_OFFLINE: true
         run: cargo test --locked --no-fail-fast
