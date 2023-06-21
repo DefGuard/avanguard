@@ -102,7 +102,7 @@ where
     let wallet_address = wallet_address.to_lowercase();
     let issue_time = Utc::now();
     let expiration = issue_time + Duration::seconds(SESSION_TIMEOUT as i64);
-    let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address.into()));
+    let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address));
     let id_token_claims = CoreIdTokenClaims::new(
         IssuerUrl::from_url(base_url.clone()),
         vec![Audience::new(client_id.to_string())],
