@@ -61,11 +61,11 @@ pub async fn web3auth_start(
     data: Json<WalletAddress>,
 ) -> Result<Json<Challenge>, ApiError> {
     // Create wallet if it does not exist yet
-    let address = data.into_inner();
-    let mut wallet = match Wallet::find_by_address(&app_state.pool, &address.address).await? {
+    let address = data.into_inner().address.to_lowercase();
+    let mut wallet = match Wallet::find_by_address(&app_state.pool, &address).await? {
         Some(wallet) => wallet,
         None => {
-            let mut wallet = Wallet::new(address.address.clone());
+            let mut wallet = Wallet::new(address);
             wallet.save(&app_state.pool).await?;
             wallet
         }
@@ -97,9 +97,10 @@ fn issue_id_token<T>(
 where
     T: Into<Vec<u8>>,
 {
+    let wallet_address = wallet_address.to_lowercase();
     let issue_time = Utc::now();
     let expiration = issue_time + Duration::seconds(SESSION_TIMEOUT as i64);
-    let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address.into()));
+    let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address));
     let id_token_claims = CoreIdTokenClaims::new(
         IssuerUrl::from_url(base_url.clone()),
         vec![Audience::new(client_id.to_string())],
@@ -135,14 +136,15 @@ pub async fn web3auth_end(
     app_state: web::Data<AppState>,
     signature: Json<WalletSignature>,
 ) -> Result<Json<JwtToken>, ApiError> {
-    let mut wallet = match Wallet::find_by_address(&app_state.pool, &signature.address).await? {
+    let address = signature.address.to_lowercase();
+    let mut wallet = match Wallet::find_by_address(&app_state.pool, &address).await? {
         Some(wallet) => wallet,
         None => return Err(ApiError::WalletNotFound),
     };
     match wallet.verify_address(&wallet.challenge_message, &signature.signature) {
         Ok(true) => {
             let id_token = issue_id_token(
-                &signature.address,
+                &address,
                 &app_state.config.issuer_url,
                 app_state.config.client_secret.clone(),
                 None,
