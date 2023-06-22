@@ -19,7 +19,6 @@ use crate::{db::Wallet, error::ApiError, state::AppState, SESSION_TIMEOUT};
 #[derive(Serialize, Deserialize)]
 pub struct Challenge {
     pub challenge: String,
-    pub signed: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -74,7 +73,6 @@ pub async fn web3auth_start(
     wallet.save(&app_state.pool).await?;
     Ok(Json(Challenge {
         challenge: wallet.challenge_message,
-        signed: wallet.challenge_signature.is_some(),
     }))
 }
 
