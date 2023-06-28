@@ -4,13 +4,15 @@ pub mod crypto;
 pub mod db;
 mod error;
 mod http;
-pub use http::{config_service, Challenge, JwtToken, WalletAddress, WalletSignature};
+pub use http::{config_service, Challenge, WalletAddress, WalletSignature};
 pub mod hex;
+mod random;
 pub mod state;
 
 #[macro_use]
 extern crate serde;
 
+// TODO: remove Unused
 pub const SESSION_TIMEOUT: u64 = 3600 * 24 * 7;
 pub static CHALLENGE_TEMPLATE: &str = "Please read this carefully:
 

@@ -394,6 +394,7 @@ dependencies = [
  "log",
  "model_derive",
  "openidconnect",
+ "rand",
  "secp256k1",
  "serde",
  "serde_json",

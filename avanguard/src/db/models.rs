@@ -3,9 +3,10 @@ use crate::{
     db::DbPool,
     error::Web3Error,
     hex::{hex_decode, to_lower_hex},
+    random::gen_alphanumeric,
     CHALLENGE_TEMPLATE,
 };
-use chrono::{NaiveDateTime, Utc};
+use chrono::{Duration, NaiveDateTime, Utc};
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use model_derive::Model;
 use secp256k1::{
@@ -143,6 +144,88 @@ pub fn hash_message<S: AsRef<[u8]>>(message: S) -> [u8; 32] {
     let mut eth_message = format!("\x19Ethereum Signed Message:\n{}", message.len()).into_bytes();
     eth_message.extend_from_slice(message);
     keccak256(&eth_message)
+}
+
+#[derive(Model)]
+pub struct RefreshToken {
+    pub(crate) id: Option<i64>,
+    pub wallet_id: i64,
+    pub token: String,
+    pub expires_at: i64,
+    pub used_at: Option<i64>,
+    pub blacklisted: bool,
+}
+
+impl RefreshToken {
+    #[must_use]
+    pub fn new(wallet_id: i64, expires_in: i64) -> Self {
+        let expiration = Utc::now() + Duration::seconds(expires_in);
+        Self {
+            id: None,
+            wallet_id,
+            token: gen_alphanumeric(24),
+            expires_at: expiration.timestamp(),
+            used_at: None,
+            blacklisted: false,
+        }
+    }
+    #[must_use]
+    pub fn is_expired(&self) -> bool {
+        self.expires_at < Utc::now().timestamp()
+    }
+
+    // Blacklist token
+    pub async fn blacklist(&self, pool: &DbPool) -> Result<(), sqlx::Error> {
+        query!(
+            "UPDATE refresh_token SET blacklisted = true \
+            WHERE token = $1",
+            self.token,
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+    /// Find by refresh token.
+    pub async fn find_refresh_token(
+        pool: &DbPool,
+        token: &str,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        match query_as!(
+            Self,
+            "SELECT wallet_id, refresh_token, expires_at, blacklisted \
+            FROM refresh_token WHERE refresh_token = $1 \
+            AND blacklisted = false \
+            AND used_at IS NULL",
+            token
+        )
+        .fetch_optional(pool)
+        .await
+        {
+            Ok(Some(token)) => {
+                if token.is_expired() {
+                    token.delete(pool).await?;
+                    Ok(None)
+                } else {
+                    Ok(Some(token))
+                }
+            }
+            Ok(None) => Ok(None),
+            Err(err) => Err(err),
+        }
+    }
+    /// Mark token as used
+    pub async fn set_used(&mut self, pool: &DbPool) -> Result<(), sqlx::Error> {
+        let used_at = Utc::now();
+        query!(
+            "UPDATE refresh_token SET used_at = $2 \
+            WHERE token = $1",
+            self.token,
+            used_at,
+        )
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

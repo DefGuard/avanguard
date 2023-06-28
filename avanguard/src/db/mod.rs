@@ -24,4 +24,5 @@ pub async fn init_db(host: &str, port: u16, name: &str, user: &str, password: &s
     pool
 }
 
+pub use models::RefreshToken;
 pub use models::Wallet;
