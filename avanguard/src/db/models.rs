@@ -174,7 +174,7 @@ impl RefreshToken {
         self.expires_at < Utc::now().timestamp()
     }
 
-    // Blacklist token
+    /// Blacklist token
     pub async fn blacklist(&self, pool: &DbPool) -> Result<(), sqlx::Error> {
         query!(
             "UPDATE refreshtoken SET blacklisted = true \
