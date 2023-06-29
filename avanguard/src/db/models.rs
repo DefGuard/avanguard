@@ -217,10 +217,7 @@ impl RefreshToken {
                     Ok(Some(token))
                 }
             }
-            Ok(None) => {
-                println!("chuj");
-                Ok(None)
-            }
+            Ok(None) => Ok(None),
             Err(err) => Err(err),
         }
     }
