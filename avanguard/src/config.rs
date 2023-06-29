@@ -88,7 +88,7 @@ pub struct Config {
     #[clap(long, env = "AG_LOG_LEVEL", default_value_t = LevelFilter::Info, help = "Log level")]
     pub log_level: LevelFilter,
 
-    #[clap(
+    #[arg(
         long,
         env = "TOKEN_TIMEOUT",
         default_value_t = 3600 * 4,
