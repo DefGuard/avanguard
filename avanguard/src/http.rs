@@ -198,10 +198,10 @@ pub async fn refresh(
                 &app_state.config.client_id,
                 app_state.config.token_timeout,
             )?;
-            return Ok(Json(JwtToken {
+            Ok(Json(JwtToken {
                 token: id_token.to_string(),
-                refresh_token: refresh_token.token,
-            }));
+                refresh_token: new_token.token,
+            }))
         } else {
             Err(ApiError::WalletNotFound)
         }

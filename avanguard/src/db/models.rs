@@ -177,7 +177,7 @@ impl RefreshToken {
     // Blacklist token
     pub async fn blacklist(&self, pool: &DbPool) -> Result<(), sqlx::Error> {
         query!(
-            "UPDATE refresh_token SET blacklisted = true \
+            "UPDATE refreshtoken SET blacklisted = true \
             WHERE token = $1",
             self.token,
         )
@@ -192,10 +192,10 @@ impl RefreshToken {
     ) -> Result<Option<Self>, sqlx::Error> {
         match query_as!(
             Self,
-            "SELECT wallet_id, refresh_token, expires_at, blacklisted \
-            FROM refresh_token WHERE refresh_token = $1 \
-            AND blacklisted = false \
-            AND used_at IS NULL",
+            r#"SELECT id "id?", wallet_id, token, expires_at, blacklisted, used_at "used_at?"
+            FROM refreshtoken WHERE token = $1 
+            AND blacklisted = false 
+            AND used_at IS NULL"#,
             token
         )
         .fetch_optional(pool)
@@ -215,12 +215,12 @@ impl RefreshToken {
     }
     /// Mark token as used
     pub async fn set_used(&mut self, pool: &DbPool) -> Result<(), sqlx::Error> {
-        let used_at = Utc::now();
+        let used_at = Utc::now().timestamp();
         query!(
-            "UPDATE refresh_token SET used_at = $2 \
+            "UPDATE refreshtoken SET used_at = $2 \
             WHERE token = $1",
             self.token,
-            used_at,
+            Some(used_at),
         )
         .execute(pool)
         .await?;

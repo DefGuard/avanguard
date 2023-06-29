@@ -36,6 +36,183 @@
     },
     "query": "INSERT INTO \"wallet\" (\"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\") VALUES ($1, $2, $3, $4, $5) RETURNING id"
   },
+  "48026faf09587ef0637443d0f3bafbb0419e51e5c8beaf6b63e51271c5b20c8f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "wallet_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "token",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "blacklisted",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "used_at?",
+          "ordinal": 5,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id \"id?\", wallet_id, token, expires_at, blacklisted, used_at \"used_at?\"\n            FROM refreshtoken WHERE token = $1 \n            AND blacklisted = false \n            AND used_at IS NULL"
+  },
+  "4c5bc0397f485ff0179fba4c72cf7f7754a3e206bebc465a724f6da537e55cbc": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "wallet_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "token",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "used_at",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "blacklisted",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted\" FROM \"refreshtoken\""
+  },
+  "5203c65bacd5e5989fe125383de0c9e69d1cc01e715dc649cef5666ac06ad0b8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Int8",
+          "Int8",
+          "Bool"
+        ]
+      }
+    },
+    "query": "UPDATE \"refreshtoken\" SET \"wallet_id\" = $2, \"token\" = $3, \"expires_at\" = $4, \"used_at\" = $5, \"blacklisted\" = $6 WHERE id = $1"
+  },
+  "74201582620a253f6e86beb6ffdd1bc313d2c33b0250374037a204e4fdc8fe36": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "UPDATE refreshtoken SET blacklisted = true WHERE token = $1"
+  },
+  "ab8960f996fe05431f0aeef34e3578fa8d48600eefbdfa7dd67b472a5c16deed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "wallet_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "token",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "used_at",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "blacklisted",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted\" FROM \"refreshtoken\" WHERE id = $1"
+  },
   "b598bb9ce5602aa4687818269f5120c73e600dda6bc9c78439d7e8b5ce02793d": {
     "describe": {
       "columns": [
@@ -83,6 +260,31 @@
       }
     },
     "query": "SELECT id \"id?\", \"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\" FROM \"wallet\""
+  },
+  "b6116d40449ca3fe126ad522e4685560f89882bd9036b358106edd8e445901c7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "UPDATE refreshtoken SET used_at = $2 WHERE token = $1"
+  },
+  "bf9689589cab8ae3e9b4f7e8f14b624604516d097dc058dadaa1dae55d0cd38b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "DELETE FROM \"refreshtoken\" WHERE id = $1"
   },
   "c906004c8470beecd44de9944927d1dabddb03de4b72eeff16d7c647206f928e": {
     "describe": {
@@ -200,6 +402,30 @@
       }
     },
     "query": "SELECT id \"id?\", \"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\" FROM \"wallet\" WHERE id = $1"
+  },
+  "ef06b762ef279af8fcb672d1738c56c5b1b56cf5e1ed0e3b1ece5c7c850ce7b5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8",
+          "Int8",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO \"refreshtoken\" (\"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted\") VALUES ($1, $2, $3, $4, $5) RETURNING id"
   },
   "f5a52d311dd0ac4c76cf1638f30cffd8c97fe2b4987fcfb9f9ca523ab6e5bf5d": {
     "describe": {
