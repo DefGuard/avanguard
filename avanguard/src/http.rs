@@ -43,6 +43,11 @@ pub struct JwtToken {
     pub refresh_token: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct RefreshTokenRequest {
+    pub refresh_token: String,
+}
+
 /// Simple HTTP server health check.
 #[get("/api/health")]
 async fn health_check() -> &'static str {
@@ -176,8 +181,9 @@ pub async fn web3auth_end(
 #[post("/refresh")]
 pub async fn refresh(
     app_state: web::Data<AppState>,
-    refresh_token: String,
+    data: Json<RefreshTokenRequest>,
 ) -> Result<Json<JwtToken>, ApiError> {
+    let refresh_token = data.into_inner().refresh_token;
     if let Ok(Some(mut refresh_token)) =
         RefreshToken::find_refresh_token(&app_state.pool, &refresh_token).await
     {
@@ -231,5 +237,6 @@ pub fn config_service(config: &mut web::ServiceConfig) {
         .service(health_check)
         .service(list_wallets)
         .service(web3auth_start)
-        .service(web3auth_end);
+        .service(web3auth_end)
+        .service(refresh);
 }

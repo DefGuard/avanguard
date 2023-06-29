@@ -172,6 +172,7 @@ async fn test_challenge_signing() {
             refresh_token: token.refresh_token.clone(),
         })
         .to_request();
+
     let token: JwtToken = test::call_and_read_body_json(&app, request).await;
     let decoded_token = decode::<Claims>(
         &token.token,
@@ -190,11 +191,9 @@ async fn test_challenge_signing() {
         })
         .to_request();
     let response = test::call_service(&app, request).await;
-    // Assert that the response status code is unauthorized (HTTP 401)
+    //Assert that the response status code is unauthorized (HTTP 401)
     assert_eq!(response.status(), http::StatusCode::UNAUTHORIZED);
-    let refresh_token = RefreshToken::find_refresh_token(&pool, &token.refresh_token)
-        .await
-        .unwrap()
-        .unwrap();
-    assert!(refresh_token.used_at.is_some())
+    let refresh_token = RefreshToken::find_by_id(&pool, 1).await.unwrap().unwrap();
+
+    assert!(refresh_token.used_at.is_some());
 }

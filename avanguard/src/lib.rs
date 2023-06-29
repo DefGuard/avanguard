@@ -12,8 +12,6 @@ pub mod state;
 #[macro_use]
 extern crate serde;
 
-// TODO: remove Unused
-pub const SESSION_TIMEOUT: u64 = 3600 * 24 * 7;
 pub static CHALLENGE_TEMPLATE: &str = "Please read this carefully:
 
 Click to sign to prove you are in possesion of your private key to the account.

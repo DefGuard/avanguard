@@ -146,7 +146,7 @@ pub fn hash_message<S: AsRef<[u8]>>(message: S) -> [u8; 32] {
     keccak256(&eth_message)
 }
 
-#[derive(Model)]
+#[derive(Model, Debug)]
 pub struct RefreshToken {
     pub(crate) id: Option<i64>,
     pub wallet_id: i64,
