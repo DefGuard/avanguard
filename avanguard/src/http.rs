@@ -198,7 +198,7 @@ pub async fn refresh(
             refresh_token.wallet_id,
         );
         refresh_token.set_used(&app_state.pool).await?;
-        let new_token = RefreshToken::new(
+        let mut new_refresh_token = RefreshToken::new(
             refresh_token.wallet_id,
             app_state.config.refresh_token_timeout,
         );
@@ -214,13 +214,14 @@ pub async fn refresh(
                 &app_state.config.client_id,
                 app_state.config.token_timeout,
             )?;
+            new_refresh_token.save(&app_state.pool).await?;
             log::info!(
                 "Issued new id_token and refresh token for user with id: {}",
                 refresh_token.wallet_id,
             );
             Ok(Json(JwtToken {
                 token: id_token.to_string(),
-                refresh_token: new_token.token,
+                refresh_token: new_refresh_token.token,
             }))
         } else {
             log::debug!(
