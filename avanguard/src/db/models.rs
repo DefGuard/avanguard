@@ -1,11 +1,3 @@
-use crate::{
-    crypto::keccak256,
-    db::DbPool,
-    error::Web3Error,
-    hex::{hex_decode, to_lower_hex},
-    random::gen_alphanumeric,
-    CHALLENGE_TEMPLATE,
-};
 use chrono::{Duration, NaiveDateTime, Utc};
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use model_derive::Model;
@@ -14,6 +6,15 @@ use secp256k1::{
     Message, Secp256k1,
 };
 use sqlx::{query, query_as};
+
+use crate::{
+    crypto::keccak256,
+    db::DbPool,
+    error::Web3Error,
+    hex::{hex_decode, to_lower_hex},
+    random::gen_alphanumeric,
+    CHALLENGE_TEMPLATE,
+};
 
 #[derive(Model, Serialize)]
 pub struct Wallet {
@@ -151,35 +152,37 @@ pub struct RefreshToken {
     pub(crate) id: Option<i64>,
     pub wallet_id: i64,
     pub token: String,
-    pub expires_at: i64,
-    pub used_at: Option<i64>,
-    pub blacklisted: bool,
+    pub expires_at: NaiveDateTime,
+    pub used_at: Option<NaiveDateTime>,
+    pub blacklisted_at: Option<NaiveDateTime>,
 }
 
 impl RefreshToken {
     #[must_use]
-    pub fn new(wallet_id: i64, expires_in: i64) -> Self {
-        let expiration = Utc::now() + Duration::seconds(expires_in);
+    pub fn new(wallet_id: i64, expires_in: u64) -> Self {
+        let expiration = Utc::now() + Duration::seconds(expires_in.try_into().unwrap());
         Self {
             id: None,
             wallet_id,
             token: gen_alphanumeric(24),
-            expires_at: expiration.timestamp(),
+            expires_at: expiration.naive_utc(),
             used_at: None,
-            blacklisted: false,
+            blacklisted_at: None,
         }
     }
     #[must_use]
     pub fn is_expired(&self) -> bool {
-        self.expires_at < Utc::now().timestamp()
+        self.expires_at < Utc::now().naive_utc()
     }
 
     /// Blacklist token
     pub async fn blacklist(&self, pool: &DbPool) -> Result<(), sqlx::Error> {
+        let blacklisted_time = Utc::now().naive_utc();
         query!(
-            "UPDATE refreshtoken SET blacklisted = true \
+            "UPDATE refreshtoken SET blacklisted_at = $2 \
             WHERE token = $1",
             self.token,
+            blacklisted_time
         )
         .execute(pool)
         .await?;
@@ -192,9 +195,9 @@ impl RefreshToken {
     ) -> Result<Option<Self>, sqlx::Error> {
         match query_as!(
             Self,
-            r#"SELECT id "id?", wallet_id, token, expires_at, blacklisted, used_at "used_at?"
+            r#"SELECT id "id?", wallet_id, token, expires_at, blacklisted_at, used_at "used_at?"
             FROM refreshtoken WHERE token = $1 
-            AND blacklisted = false 
+            AND blacklisted_at IS NULL 
             AND used_at IS NULL"#,
             token
         )
@@ -220,7 +223,7 @@ impl RefreshToken {
     }
     /// Mark token as used
     pub async fn set_used(&mut self, pool: &DbPool) -> Result<(), sqlx::Error> {
-        let used_at = Utc::now().timestamp();
+        let used_at = Utc::now().naive_utc();
         query!(
             "UPDATE refreshtoken SET used_at = $2 \
             WHERE token = $1",

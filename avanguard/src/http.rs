@@ -94,7 +94,7 @@ fn issue_id_token<T>(
     rsa_key: Option<CoreRsaPrivateSigningKey>,
     nonce: &str,
     client_id: &str,
-    token_expiration: i64,
+    token_expiration: u64,
 ) -> Result<
     IdToken<
         EmptyAdditionalClaims,
@@ -110,7 +110,7 @@ where
 {
     let wallet_address = wallet_address.to_lowercase();
     let issue_time = Utc::now();
-    let expiration = issue_time + Duration::seconds(token_expiration);
+    let expiration = issue_time + Duration::seconds(token_expiration.try_into().unwrap());
     let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address));
     let id_token_claims = CoreIdTokenClaims::new(
         IssuerUrl::from_url(base_url.clone()),

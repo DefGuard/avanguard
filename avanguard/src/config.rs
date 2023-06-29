@@ -94,7 +94,7 @@ pub struct Config {
         default_value_t = 3600 * 4,
         help = "Token timeout"
     )]
-    pub token_timeout: i64,
+    pub token_timeout: u64,
 
     #[clap(
         long,
@@ -102,5 +102,5 @@ pub struct Config {
         default_value_t = 3600 * 24,
         help = "Refresh token timeout"
     )]
-    pub refresh_token_timeout: i64,
+    pub refresh_token_timeout: u64,
 }

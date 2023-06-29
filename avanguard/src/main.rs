@@ -1,10 +1,11 @@
+use std::net::{IpAddr, Ipv4Addr};
+
 use actix_cors::Cors;
 use actix_web::{http::header, middleware, web, App, HttpServer};
 use anyhow::Result;
 use avanguard::{config_service, db::init_db, state::AppState, Config};
 use clap::Parser;
 use env_logger::Builder;
-use std::net::{IpAddr, Ipv4Addr};
 
 #[macro_use]
 extern crate log;

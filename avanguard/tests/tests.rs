@@ -2,19 +2,14 @@ use actix_web::{http, middleware, test, web, App};
 use avanguard::{
     config_service,
     crypto::keccak256,
-    db::{RefreshToken, Wallet},
+    db::{init_db, DbPool, RefreshToken, Wallet},
     state::AppState,
-    Challenge, JwtToken, WalletAddress, WalletSignature, CHALLENGE_TEMPLATE,
+    Challenge, Config, JwtToken, WalletAddress, WalletSignature, CHALLENGE_TEMPLATE,
 };
+use clap::Parser;
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use secp256k1::{rand::rngs::OsRng, Message, Secp256k1};
-
-use avanguard::{
-    db::{init_db, DbPool},
-    Config,
-};
-use clap::Parser;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnectOptions, query, types::Uuid};
 
