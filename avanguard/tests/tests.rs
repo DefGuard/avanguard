@@ -168,9 +168,9 @@ async fn test_challenge_signing() {
         })
         .to_request();
 
-    let token: JwtToken = test::call_and_read_body_json(&app, request).await;
+    let new_token: JwtToken = test::call_and_read_body_json(&app, request).await;
     let decoded_token = decode::<Claims>(
-        &token.token,
+        &new_token.token,
         &DecodingKey::from_secret(config.client_secret.as_ref()),
         &Validation::new(Algorithm::HS256),
     );
