@@ -181,6 +181,11 @@ pub async fn refresh(
     if let Ok(Some(mut refresh_token)) =
         RefreshToken::find_refresh_token(&app_state.pool, &refresh_token).await
     {
+        log::debug!(
+            "Refreshing token: {} for user with id: {}",
+            refresh_token.token,
+            refresh_token.wallet_id,
+        );
         refresh_token.set_used(&app_state.pool).await?;
         let new_token = RefreshToken::new(
             refresh_token.wallet_id,
@@ -198,14 +203,24 @@ pub async fn refresh(
                 &app_state.config.client_id,
                 app_state.config.token_timeout,
             )?;
+            log::info!(
+                "Issued new id_token and refresh token for user with id: {}",
+                refresh_token.wallet_id,
+            );
             Ok(Json(JwtToken {
                 token: id_token.to_string(),
                 refresh_token: new_token.token,
             }))
         } else {
+            log::debug!(
+                "Wallet with id: {} assigned to token: {} not found",
+                refresh_token.wallet_id,
+                refresh_token.token,
+            );
             Err(ApiError::WalletNotFound)
         }
     } else {
+        log::debug!("Refresh token: {} not found", refresh_token);
         Err(ApiError::TokenNotFound)
     }
 }

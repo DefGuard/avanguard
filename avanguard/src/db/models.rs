@@ -203,6 +203,11 @@ impl RefreshToken {
         {
             Ok(Some(token)) => {
                 if token.is_expired() {
+                    log::debug!(
+                        "Found token: {} but expired at: {} removing it from database",
+                        token.token,
+                        token.expires_at
+                    );
                     token.delete(pool).await?;
                     Ok(None)
                 } else {
@@ -224,6 +229,12 @@ impl RefreshToken {
         )
         .execute(pool)
         .await?;
+        log::info!(
+            "Marked token: {} for user with id: {} at date: {}",
+            self.token,
+            self.wallet_id,
+            self.used_at.unwrap(),
+        );
         Ok(())
     }
 }
