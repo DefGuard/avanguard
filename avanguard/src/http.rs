@@ -174,6 +174,7 @@ pub async fn web3auth_end(
                     refresh_token: refresh_token.token,
                 }))
             } else {
+                log::error!("Wallet with address: {} has no id", wallet.address);
                 Err(ApiError::WalletNotFound)
             }
         }
