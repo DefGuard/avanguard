@@ -159,8 +159,8 @@ pub struct RefreshToken {
 
 impl RefreshToken {
     #[must_use]
-    pub fn new(wallet_id: i64, expires_in: u64) -> Self {
-        let expiration = Utc::now() + Duration::seconds(expires_in.try_into().unwrap());
+    pub fn new(wallet_id: i64, expires_in: u32) -> Self {
+        let expiration = Utc::now() + Duration::seconds(expires_in.into());
         Self {
             id: None,
             wallet_id,
@@ -233,10 +233,10 @@ impl RefreshToken {
         .execute(pool)
         .await?;
         log::info!(
-            "Marked token: {} for user with id: {} at date: {}",
+            "Marked token: {} for user with id: {} at date: {:?}",
             self.token,
             self.wallet_id,
-            self.used_at.unwrap(),
+            self.used_at,
         );
         Ok(())
     }

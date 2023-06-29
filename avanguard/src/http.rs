@@ -94,7 +94,7 @@ fn issue_id_token<T>(
     rsa_key: Option<CoreRsaPrivateSigningKey>,
     nonce: &str,
     client_id: &str,
-    token_expiration: u64,
+    token_expiration: u32,
 ) -> Result<
     IdToken<
         EmptyAdditionalClaims,
@@ -110,7 +110,7 @@ where
 {
     let wallet_address = wallet_address.to_lowercase();
     let issue_time = Utc::now();
-    let expiration = issue_time + Duration::seconds(token_expiration.try_into().unwrap());
+    let expiration = issue_time + Duration::seconds(token_expiration.into());
     let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address));
     let id_token_claims = CoreIdTokenClaims::new(
         IssuerUrl::from_url(base_url.clone()),
@@ -165,13 +165,17 @@ pub async fn web3auth_end(
             )?;
             wallet.challenge_signature = Some(signature.signature.clone());
             wallet.save(&app_state.pool).await?;
-            let mut refresh_token =
-                RefreshToken::new(wallet.id.unwrap(), app_state.config.refresh_token_timeout);
-            refresh_token.save(&app_state.pool).await?;
-            Ok(Json(JwtToken {
-                token: id_token.to_string(),
-                refresh_token: refresh_token.token,
-            }))
+            if let Some(wallet_id) = wallet.id {
+                let mut refresh_token =
+                    RefreshToken::new(wallet_id, app_state.config.refresh_token_timeout);
+                refresh_token.save(&app_state.pool).await?;
+                Ok(Json(JwtToken {
+                    token: id_token.to_string(),
+                    refresh_token: refresh_token.token,
+                }))
+            } else {
+                Err(ApiError::WalletNotFound)
+            }
         }
         _ => Err(ApiError::SignatureIncorrect),
     }
