@@ -155,7 +155,7 @@ async fn test_challenge_signing() {
         .to_request();
     request.headers_mut().insert(
         http::header::HeaderName::from_static("x-forwarded-for"),
-        http::header::HeaderValue::from_static("127.0.0.1"), 
+        http::header::HeaderValue::from_static("127.0.0.1"),
     );
 
     let token: JwtToken = test::call_and_read_body_json(&app, request).await;
@@ -174,7 +174,7 @@ async fn test_challenge_signing() {
         .to_request();
     request.headers_mut().insert(
         http::header::HeaderName::from_static("x-forwarded-for"),
-        http::header::HeaderValue::from_static("127.0.0.1"), 
+        http::header::HeaderValue::from_static("127.0.0.1"),
     );
     let new_token: JwtToken = test::call_and_read_body_json(&app, request).await;
     let decoded_token = decode::<Claims>(
@@ -195,7 +195,7 @@ async fn test_challenge_signing() {
         .to_request();
     request.headers_mut().insert(
         http::header::HeaderName::from_static("x-forwarded-for"),
-        http::header::HeaderValue::from_static("127.0.0.1"), 
+        http::header::HeaderValue::from_static("127.0.0.1"),
     );
     let response = test::call_service(&app, request).await;
     //Assert that the response status code is unauthorized (HTTP 401)
@@ -212,7 +212,7 @@ async fn test_challenge_signing() {
         .to_request();
     request.headers_mut().insert(
         http::header::HeaderName::from_static("x-forwarded-for"),
-        http::header::HeaderValue::from_static("127.0.0.1"), 
+        http::header::HeaderValue::from_static("127.0.0.1"),
     );
 
     let token: JwtToken = test::call_and_read_body_json(&app, request).await;
@@ -233,7 +233,7 @@ async fn test_challenge_signing() {
         .to_request();
     request.headers_mut().insert(
         http::header::HeaderName::from_static("x-forwarded-for"),
-        http::header::HeaderValue::from_static("127.0.1.1"), 
+        http::header::HeaderValue::from_static("127.0.1.1"),
     );
     let response = test::call_service(&app, request).await;
     assert_eq!(response.status(), http::StatusCode::UNAUTHORIZED);
