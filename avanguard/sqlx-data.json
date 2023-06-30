@@ -1,22 +1,5 @@
 {
   "db": "PostgreSQL",
-  "022d94d0bd98daaac8f888bf9569cb2a8aade0e0e5930d98b263fc0b6b4f9a56": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Timestamp",
-          "Timestamp"
-        ]
-      }
-    },
-    "query": "UPDATE \"refreshtoken\" SET \"wallet_id\" = $2, \"token\" = $3, \"expires_at\" = $4, \"used_at\" = $5, \"blacklisted_at\" = $6 WHERE id = $1"
-  },
   "169a39acbf7e6b74fd9f538047b0af650fe1bfa21d844a216e80965011290412": {
     "describe": {
       "columns": [],
@@ -29,55 +12,30 @@
     },
     "query": "DELETE FROM \"wallet\" WHERE id = $1"
   },
-  "16ec4b8dd1b0ec96dc96fc38b89c7d86ea494d8103839b2df6471a62645f1d69": {
+  "1d767c9501f608a10bd92df23ffefaf30230b8e4e95e5161883ae40158b63656": {
     "describe": {
       "columns": [
         {
-          "name": "id?",
+          "name": "id",
           "ordinal": 0,
           "type_info": "Int8"
-        },
-        {
-          "name": "wallet_id",
-          "ordinal": 1,
-          "type_info": "Int8"
-        },
-        {
-          "name": "token",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "expires_at",
-          "ordinal": 3,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "used_at",
-          "ordinal": 4,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "blacklisted_at",
-          "ordinal": 5,
-          "type_info": "Timestamp"
         }
       ],
       "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        true
+        false
       ],
       "parameters": {
         "Left": [
-          "Int8"
+          "Int8",
+          "Text",
+          "Text",
+          "Timestamp",
+          "Timestamp",
+          "Timestamp"
         ]
       }
     },
-    "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted_at\" FROM \"refreshtoken\" WHERE id = $1"
+    "query": "INSERT INTO \"refreshtoken\" (\"wallet_id\", \"token\", \"ip_address\", \"expires_at\", \"used_at\", \"blacklisted_at\") VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
   },
   "2511e07f3a011ca939b829b62741de02fd2911b0bd2a92dafc3ce40d157a1f5d": {
     "describe": {
@@ -103,7 +61,63 @@
     },
     "query": "INSERT INTO \"wallet\" (\"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\") VALUES ($1, $2, $3, $4, $5) RETURNING id"
   },
-  "49a82b258d81bbf3bd0bbdfd8b798b64049900b1cf081fa41d7cd0d49f59cc31": {
+  "5e2879e4ed28bfbb3f699fd3d17aeaa2e5bad9964f410a6c16c4ca20c5442647": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "wallet_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "token",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "ip_address",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "used_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "blacklisted_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"ip_address\", \"expires_at\", \"used_at\", \"blacklisted_at\" FROM \"refreshtoken\" WHERE id = $1"
+  },
+  "969c61707342c646ed37c521b1fdfcec569d774f971bf04cd9c903f85ded8219": {
     "describe": {
       "columns": [
         {
@@ -135,6 +149,11 @@
           "name": "used_at?",
           "ordinal": 5,
           "type_info": "Timestamp"
+        },
+        {
+          "name": "ip_address",
+          "ordinal": 6,
+          "type_info": "Text"
         }
       ],
       "nullable": [
@@ -143,7 +162,8 @@
         false,
         false,
         true,
-        true
+        true,
+        false
       ],
       "parameters": {
         "Left": [
@@ -151,55 +171,7 @@
         ]
       }
     },
-    "query": "SELECT id \"id?\", wallet_id, token, expires_at, blacklisted_at, used_at \"used_at?\"\n            FROM refreshtoken WHERE token = $1 \n            AND blacklisted_at IS NULL \n            AND used_at IS NULL"
-  },
-  "6b8bef616429f7b8d84796d03d8ce8ed665c4944a51aaa5df2e7ab056cf244a4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id?",
-          "ordinal": 0,
-          "type_info": "Int8"
-        },
-        {
-          "name": "wallet_id",
-          "ordinal": 1,
-          "type_info": "Int8"
-        },
-        {
-          "name": "token",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "expires_at",
-          "ordinal": 3,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "used_at",
-          "ordinal": 4,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "blacklisted_at",
-          "ordinal": 5,
-          "type_info": "Timestamp"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted_at\" FROM \"refreshtoken\""
+    "query": "SELECT id \"id?\", wallet_id, token, expires_at, blacklisted_at, used_at \"used_at?\", ip_address\n            FROM refreshtoken WHERE token = $1 \n            AND blacklisted_at IS NULL \n            AND used_at IS NULL"
   },
   "b163bf460c560ebc46e2e2c83d61d3057bbe4db146d5b35c4bf8be79751a397e": {
     "describe": {
@@ -274,30 +246,6 @@
       }
     },
     "query": "UPDATE refreshtoken SET used_at = $2 WHERE token = $1"
-  },
-  "ba836ec04b14328e737fd5f28dd197cddb9cd4c2a8aa8aaecdb9c96287b82589": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Timestamp",
-          "Timestamp"
-        ]
-      }
-    },
-    "query": "INSERT INTO \"refreshtoken\" (\"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted_at\") VALUES ($1, $2, $3, $4, $5) RETURNING id"
   },
   "bf9689589cab8ae3e9b4f7e8f14b624604516d097dc058dadaa1dae55d0cd38b": {
     "describe": {
@@ -428,6 +376,24 @@
     },
     "query": "SELECT id \"id?\", \"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\" FROM \"wallet\" WHERE id = $1"
   },
+  "f3fb1846cef91d48871664f9fa8d5b19ffa8e1e064c1cb172f9a258be9fabff5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Text",
+          "Timestamp",
+          "Timestamp",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "UPDATE \"refreshtoken\" SET \"wallet_id\" = $2, \"token\" = $3, \"ip_address\" = $4, \"expires_at\" = $5, \"used_at\" = $6, \"blacklisted_at\" = $7 WHERE id = $1"
+  },
   "f5a52d311dd0ac4c76cf1638f30cffd8c97fe2b4987fcfb9f9ca523ab6e5bf5d": {
     "describe": {
       "columns": [],
@@ -441,6 +407,60 @@
       }
     },
     "query": "UPDATE wallet SET challenge_signature = $1, validation_timestamp = $2 WHERE id = $3"
+  },
+  "f876adcf4c1bb25b03cc4b29534c28bade9d3591b5ffc6f2794098817cd98d56": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id?",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "wallet_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "token",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "ip_address",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "used_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "blacklisted_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"ip_address\", \"expires_at\", \"used_at\", \"blacklisted_at\" FROM \"refreshtoken\""
   },
   "fd0ac3b0e2c411ddf711a284ec6a4d69ac7836a5f3e1e1ddc419c69b039e8017": {
     "describe": {
