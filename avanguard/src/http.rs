@@ -14,7 +14,11 @@ use openidconnect::{
 };
 use sqlx::query_as;
 
-use crate::{db::Wallet, error::ApiError, state::AppState, SESSION_TIMEOUT};
+use crate::{
+    db::{RefreshToken, Wallet},
+    error::ApiError,
+    state::AppState,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct Challenge {
@@ -36,6 +40,12 @@ pub struct WalletSignature {
 #[derive(Serialize, Deserialize)]
 pub struct JwtToken {
     pub token: String,
+    pub refresh_token: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RefreshTokenRequest {
+    pub refresh_token: String,
 }
 
 /// Simple HTTP server health check.
@@ -84,6 +94,7 @@ fn issue_id_token<T>(
     rsa_key: Option<CoreRsaPrivateSigningKey>,
     nonce: &str,
     client_id: &str,
+    token_expiration: u32,
 ) -> Result<
     IdToken<
         EmptyAdditionalClaims,
@@ -99,7 +110,7 @@ where
 {
     let wallet_address = wallet_address.to_lowercase();
     let issue_time = Utc::now();
-    let expiration = issue_time + Duration::seconds(SESSION_TIMEOUT as i64);
+    let expiration = issue_time + Duration::seconds(token_expiration.into());
     let claims = StandardClaims::new(SubjectIdentifier::new(wallet_address));
     let id_token_claims = CoreIdTokenClaims::new(
         IssuerUrl::from_url(base_url.clone()),
@@ -150,14 +161,79 @@ pub async fn web3auth_end(
                 None,
                 &signature.nonce,
                 &app_state.config.client_id,
+                app_state.config.token_timeout,
             )?;
             wallet.challenge_signature = Some(signature.signature.clone());
             wallet.save(&app_state.pool).await?;
-            Ok(Json(JwtToken {
-                token: id_token.to_string(),
-            }))
+            if let Some(wallet_id) = wallet.id {
+                let mut refresh_token =
+                    RefreshToken::new(wallet_id, app_state.config.refresh_token_timeout);
+                refresh_token.save(&app_state.pool).await?;
+                Ok(Json(JwtToken {
+                    token: id_token.to_string(),
+                    refresh_token: refresh_token.token,
+                }))
+            } else {
+                log::error!("Wallet with address: {} has no id", wallet.address);
+                Err(ApiError::WalletNotFound)
+            }
         }
         _ => Err(ApiError::SignatureIncorrect),
+    }
+}
+
+/// Issue new id token and refresh token set old as used
+#[post("/refresh")]
+pub async fn refresh(
+    app_state: web::Data<AppState>,
+    data: Json<RefreshTokenRequest>,
+) -> Result<Json<JwtToken>, ApiError> {
+    let refresh_token = data.into_inner().refresh_token;
+    if let Ok(Some(mut refresh_token)) =
+        RefreshToken::find_refresh_token(&app_state.pool, &refresh_token).await
+    {
+        log::debug!(
+            "Refreshing token: {} for user with id: {}",
+            refresh_token.token,
+            refresh_token.wallet_id,
+        );
+        refresh_token.set_used(&app_state.pool).await?;
+        let mut new_refresh_token = RefreshToken::new(
+            refresh_token.wallet_id,
+            app_state.config.refresh_token_timeout,
+        );
+        if let Some(wallet) = Wallet::find_by_id(&app_state.pool, refresh_token.wallet_id).await? {
+            // Doesn't return nonce while refreshing token
+            // https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse
+            let id_token = issue_id_token(
+                &wallet.address,
+                &app_state.config.issuer_url,
+                app_state.config.client_secret.clone(),
+                None,
+                "",
+                &app_state.config.client_id,
+                app_state.config.token_timeout,
+            )?;
+            new_refresh_token.save(&app_state.pool).await?;
+            log::info!(
+                "Issued new id_token and refresh token for user with id: {}",
+                refresh_token.wallet_id,
+            );
+            Ok(Json(JwtToken {
+                token: id_token.to_string(),
+                refresh_token: new_refresh_token.token,
+            }))
+        } else {
+            log::debug!(
+                "Wallet with id: {} assigned to token: {} not found",
+                refresh_token.wallet_id,
+                refresh_token.token,
+            );
+            Err(ApiError::WalletNotFound)
+        }
+    } else {
+        log::debug!("Refresh token: {} not found", refresh_token);
+        Err(ApiError::TokenNotFound)
     }
 }
 
@@ -167,5 +243,6 @@ pub fn config_service(config: &mut web::ServiceConfig) {
         .service(health_check)
         .service(list_wallets)
         .service(web3auth_start)
-        .service(web3auth_end);
+        .service(web3auth_end)
+        .service(refresh);
 }

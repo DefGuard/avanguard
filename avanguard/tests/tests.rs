@@ -1,17 +1,15 @@
-use actix_web::{middleware, test, web, App};
+use actix_web::{http, middleware, test, web, App};
 use avanguard::{
-    config_service, crypto::keccak256, db::Wallet, state::AppState, Challenge, JwtToken,
-    WalletAddress, WalletSignature, CHALLENGE_TEMPLATE,
+    config_service,
+    crypto::keccak256,
+    db::{init_db, DbPool, RefreshToken, Wallet},
+    state::AppState,
+    Challenge, Config, JwtToken, WalletAddress, WalletSignature, CHALLENGE_TEMPLATE,
 };
+use clap::Parser;
 use ethers::types::transaction::eip712::{Eip712, TypedData};
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use secp256k1::{rand::rngs::OsRng, Message, Secp256k1};
-
-use avanguard::{
-    db::{init_db, DbPool},
-    Config,
-};
-use clap::Parser;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnectOptions, query, types::Uuid};
 
@@ -22,6 +20,11 @@ pub struct Claims {
     pub aud: Vec<String>,
     pub exp: i64,
     pub nonce: String,
+}
+
+#[derive(Serialize)]
+struct RefreshTokenRequest {
+    refresh_token: String,
 }
 
 /// Initializes & migrates database with random name for tests.
@@ -157,4 +160,53 @@ async fn test_challenge_signing() {
         &Validation::new(Algorithm::HS256),
     )
     .is_ok());
+    // Test refreshing token
+    let request = test::TestRequest::post()
+        .uri("/refresh")
+        .set_json(RefreshTokenRequest {
+            refresh_token: token.refresh_token.clone(),
+        })
+        .to_request();
+
+    let new_token: JwtToken = test::call_and_read_body_json(&app, request).await;
+    let decoded_token = decode::<Claims>(
+        &new_token.token,
+        &DecodingKey::from_secret(config.client_secret.as_ref()),
+        &Validation::new(Algorithm::HS256),
+    );
+    assert!(decoded_token.is_ok());
+    let claims = decoded_token.unwrap().claims;
+    // No nonce in new id token
+    assert_eq!(claims.nonce, "");
+    // Test used token refresh
+    let request = test::TestRequest::post()
+        .uri("/refresh")
+        .set_json(RefreshTokenRequest {
+            refresh_token: token.refresh_token.clone(),
+        })
+        .to_request();
+    let response = test::call_service(&app, request).await;
+    //Assert that the response status code is unauthorized (HTTP 401)
+    assert_eq!(response.status(), http::StatusCode::UNAUTHORIZED);
+    // Check if token has used_at set
+    let refresh_token = RefreshToken::find_by_id(&pool, 1).await.unwrap().unwrap();
+    assert!(refresh_token.used_at.is_some());
+
+    // Test refreshing with new token
+    let request = test::TestRequest::post()
+        .uri("/refresh")
+        .set_json(RefreshTokenRequest {
+            refresh_token: new_token.refresh_token.clone(),
+        })
+        .to_request();
+
+    let token: JwtToken = test::call_and_read_body_json(&app, request).await;
+    assert!(decode::<Claims>(
+        &token.token,
+        &DecodingKey::from_secret(config.client_secret.as_ref()),
+        &Validation::new(Algorithm::HS256),
+    )
+    .is_ok());
+    let refresh_token = RefreshToken::find_by_id(&pool, 2).await.unwrap().unwrap();
+    assert!(refresh_token.used_at.is_some());
 }

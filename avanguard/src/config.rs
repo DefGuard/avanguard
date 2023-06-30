@@ -87,4 +87,20 @@ pub struct Config {
 
     #[clap(long, env = "AG_LOG_LEVEL", default_value_t = LevelFilter::Info, help = "Log level")]
     pub log_level: LevelFilter,
+
+    #[arg(
+        long,
+        env = "TOKEN_TIMEOUT",
+        default_value_t = 3600 * 4,
+        help = "Token timeout"
+    )]
+    pub token_timeout: u32,
+
+    #[clap(
+        long,
+        env = "REFRESH_TOKEN_TIMEOUT",
+        default_value_t = 3600 * 24,
+        help = "Refresh token timeout"
+    )]
+    pub refresh_token_timeout: u32,
 }

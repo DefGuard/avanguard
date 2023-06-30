@@ -11,6 +11,8 @@ pub enum ApiError {
     Sqlx(#[from] sqlx::Error),
     #[error("wallet not found")]
     WalletNotFound,
+    #[error("refresh token not found")]
+    TokenNotFound,
     #[error("signature incorrect")]
     SignatureIncorrect,
     #[error("signing error")]
@@ -24,6 +26,7 @@ impl ApiError {
             Self::WalletNotFound => "WalletNotFound",
             Self::SignatureIncorrect => "SignatureIncorrect",
             Self::SigningError(_) => "SignatureIncorrect",
+            Self::TokenNotFound => "TokenNotFound",
         }
     }
 
@@ -33,6 +36,7 @@ impl ApiError {
             Self::WalletNotFound => String::from("Wallet not found"),
             Self::SignatureIncorrect => String::from("Signature incorrect"),
             Self::SigningError(_) => String::from("Signing error"),
+            Self::TokenNotFound => String::from("Refresh token not found"),
         }
     }
 }
@@ -66,6 +70,7 @@ impl ResponseError for ApiError {
             ApiError::WalletNotFound => StatusCode::UNAUTHORIZED,
             ApiError::SignatureIncorrect => StatusCode::UNAUTHORIZED,
             ApiError::SigningError(_) => StatusCode::UNAUTHORIZED,
+            ApiError::TokenNotFound => StatusCode::UNAUTHORIZED,
         }
     }
 }
