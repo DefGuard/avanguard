@@ -145,7 +145,7 @@ async fn test_challenge_signing() {
     sig_arr[64] = rec_id.to_i32() as u8;
 
     // POST signed challenge, retrieve JWT token and ensure it's correct
-    let request = test::TestRequest::post()
+    let mut request = test::TestRequest::post()
         .uri("/auth")
         .set_json(WalletSignature {
             address: wallet_address.clone(),
@@ -153,6 +153,11 @@ async fn test_challenge_signing() {
             nonce: String::from("test"),
         })
         .to_request();
+    request.headers_mut().insert(
+        http::header::HeaderName::from_static("x-forwarded-for"),
+        http::header::HeaderValue::from_static("127.0.0.1"), 
+    );
+
     let token: JwtToken = test::call_and_read_body_json(&app, request).await;
     assert!(decode::<Claims>(
         &token.token,
@@ -161,13 +166,16 @@ async fn test_challenge_signing() {
     )
     .is_ok());
     // Test refreshing token
-    let request = test::TestRequest::post()
+    let mut request = test::TestRequest::post()
         .uri("/refresh")
         .set_json(RefreshTokenRequest {
             refresh_token: token.refresh_token.clone(),
         })
         .to_request();
-
+    request.headers_mut().insert(
+        http::header::HeaderName::from_static("x-forwarded-for"),
+        http::header::HeaderValue::from_static("127.0.0.1"), 
+    );
     let new_token: JwtToken = test::call_and_read_body_json(&app, request).await;
     let decoded_token = decode::<Claims>(
         &new_token.token,
@@ -179,26 +187,33 @@ async fn test_challenge_signing() {
     // No nonce in new id token
     assert_eq!(claims.nonce, "");
     // Test used token refresh
-    let request = test::TestRequest::post()
+    let mut request = test::TestRequest::post()
         .uri("/refresh")
         .set_json(RefreshTokenRequest {
             refresh_token: token.refresh_token.clone(),
         })
         .to_request();
+    request.headers_mut().insert(
+        http::header::HeaderName::from_static("x-forwarded-for"),
+        http::header::HeaderValue::from_static("127.0.0.1"), 
+    );
     let response = test::call_service(&app, request).await;
     //Assert that the response status code is unauthorized (HTTP 401)
     assert_eq!(response.status(), http::StatusCode::UNAUTHORIZED);
     // Check if token has used_at set
     let refresh_token = RefreshToken::find_by_id(&pool, 1).await.unwrap().unwrap();
     assert!(refresh_token.used_at.is_some());
-
     // Test refreshing with new token
-    let request = test::TestRequest::post()
+    let mut request = test::TestRequest::post()
         .uri("/refresh")
         .set_json(RefreshTokenRequest {
             refresh_token: new_token.refresh_token.clone(),
         })
         .to_request();
+    request.headers_mut().insert(
+        http::header::HeaderName::from_static("x-forwarded-for"),
+        http::header::HeaderValue::from_static("127.0.0.1"), 
+    );
 
     let token: JwtToken = test::call_and_read_body_json(&app, request).await;
     assert!(decode::<Claims>(
@@ -209,4 +224,19 @@ async fn test_challenge_signing() {
     .is_ok());
     let refresh_token = RefreshToken::find_by_id(&pool, 2).await.unwrap().unwrap();
     assert!(refresh_token.used_at.is_some());
+    // Test refreshing with different ip
+    let mut request = test::TestRequest::post()
+        .uri("/refresh")
+        .set_json(RefreshTokenRequest {
+            refresh_token: token.refresh_token.clone(),
+        })
+        .to_request();
+    request.headers_mut().insert(
+        http::header::HeaderName::from_static("x-forwarded-for"),
+        http::header::HeaderValue::from_static("127.0.1.1"), 
+    );
+    let response = test::call_service(&app, request).await;
+    assert_eq!(response.status(), http::StatusCode::UNAUTHORIZED);
+    let refresh_token = RefreshToken::find_by_id(&pool, 3).await.unwrap().unwrap();
+    assert!(refresh_token.blacklisted_at.is_some());
 }

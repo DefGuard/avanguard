@@ -152,6 +152,7 @@ pub struct RefreshToken {
     pub(crate) id: Option<i64>,
     pub wallet_id: i64,
     pub token: String,
+    pub ip_address: String,
     pub expires_at: NaiveDateTime,
     pub used_at: Option<NaiveDateTime>,
     pub blacklisted_at: Option<NaiveDateTime>,
@@ -159,7 +160,7 @@ pub struct RefreshToken {
 
 impl RefreshToken {
     #[must_use]
-    pub fn new(wallet_id: i64, expires_in: u32) -> Self {
+    pub fn new(wallet_id: i64, expires_in: u32, ip_address: &str) -> Self {
         let expiration = Utc::now() + Duration::seconds(expires_in.into());
         Self {
             id: None,
@@ -168,6 +169,7 @@ impl RefreshToken {
             expires_at: expiration.naive_utc(),
             used_at: None,
             blacklisted_at: None,
+            ip_address: ip_address.into(),
         }
     }
     #[must_use]
@@ -195,7 +197,7 @@ impl RefreshToken {
     ) -> Result<Option<Self>, sqlx::Error> {
         match query_as!(
             Self,
-            r#"SELECT id "id?", wallet_id, token, expires_at, blacklisted_at, used_at "used_at?"
+            r#"SELECT id "id?", wallet_id, token, expires_at, blacklisted_at, used_at "used_at?", ip_address
             FROM refreshtoken WHERE token = $1 
             AND blacklisted_at IS NULL 
             AND used_at IS NULL"#,

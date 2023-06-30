@@ -17,6 +17,10 @@ pub enum ApiError {
     SignatureIncorrect,
     #[error("signing error")]
     SigningError(#[from] JsonWebTokenError),
+    #[error("ip not found")]
+    IpNotFound,
+    #[error("ip incorrect")]
+    IpIncorrect,
 }
 
 impl ApiError {
@@ -27,6 +31,8 @@ impl ApiError {
             Self::SignatureIncorrect => "SignatureIncorrect",
             Self::SigningError(_) => "SignatureIncorrect",
             Self::TokenNotFound => "TokenNotFound",
+            Self::IpNotFound => "IpNotFound",
+            Self::IpIncorrect => "IpIncorrect",
         }
     }
 
@@ -37,6 +43,8 @@ impl ApiError {
             Self::SignatureIncorrect => String::from("Signature incorrect"),
             Self::SigningError(_) => String::from("Signing error"),
             Self::TokenNotFound => String::from("Refresh token not found"),
+            Self::IpNotFound => String::from("Client ip not found"),
+            Self::IpIncorrect => String::from("Ip not matching"),
         }
     }
 }
@@ -71,6 +79,8 @@ impl ResponseError for ApiError {
             ApiError::SignatureIncorrect => StatusCode::UNAUTHORIZED,
             ApiError::SigningError(_) => StatusCode::UNAUTHORIZED,
             ApiError::TokenNotFound => StatusCode::UNAUTHORIZED,
+            ApiError::IpNotFound => StatusCode::UNAUTHORIZED,
+            ApiError::IpIncorrect => StatusCode::UNAUTHORIZED,
         }
     }
 }

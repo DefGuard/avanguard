@@ -1,4 +1,5 @@
 use actix_web::{
+    dev::ConnectionInfo,
     get, post,
     web::{self, Json},
 };
@@ -146,6 +147,7 @@ where
 pub async fn web3auth_end(
     app_state: web::Data<AppState>,
     signature: Json<WalletSignature>,
+    conn_info: ConnectionInfo,
 ) -> Result<Json<JwtToken>, ApiError> {
     let address = signature.address.to_lowercase();
     let mut wallet = match Wallet::find_by_address(&app_state.pool, &address).await? {
@@ -166,13 +168,21 @@ pub async fn web3auth_end(
             wallet.challenge_signature = Some(signature.signature.clone());
             wallet.save(&app_state.pool).await?;
             if let Some(wallet_id) = wallet.id {
-                let mut refresh_token =
-                    RefreshToken::new(wallet_id, app_state.config.refresh_token_timeout);
-                refresh_token.save(&app_state.pool).await?;
-                Ok(Json(JwtToken {
-                    token: id_token.to_string(),
-                    refresh_token: refresh_token.token,
-                }))
+                if let Some(ip_address) = conn_info.realip_remote_addr() {
+                    let mut refresh_token = RefreshToken::new(
+                        wallet_id,
+                        app_state.config.refresh_token_timeout,
+                        ip_address,
+                    );
+                    refresh_token.save(&app_state.pool).await?;
+                    Ok(Json(JwtToken {
+                        token: id_token.to_string(),
+                        refresh_token: refresh_token.token,
+                    }))
+                } else {
+                    log::error!("Can't extract client ip address");
+                    Err(ApiError::IpNotFound)
+                }
             } else {
                 log::error!("Wallet with address: {} has no id", wallet.address);
                 Err(ApiError::WalletNotFound)
@@ -187,6 +197,7 @@ pub async fn web3auth_end(
 pub async fn refresh(
     app_state: web::Data<AppState>,
     data: Json<RefreshTokenRequest>,
+    conn_info: ConnectionInfo,
 ) -> Result<Json<JwtToken>, ApiError> {
     let refresh_token = data.into_inner().refresh_token;
     if let Ok(Some(mut refresh_token)) =
@@ -198,31 +209,43 @@ pub async fn refresh(
             refresh_token.wallet_id,
         );
         refresh_token.set_used(&app_state.pool).await?;
-        let mut new_refresh_token = RefreshToken::new(
-            refresh_token.wallet_id,
-            app_state.config.refresh_token_timeout,
-        );
+
         if let Some(wallet) = Wallet::find_by_id(&app_state.pool, refresh_token.wallet_id).await? {
-            // Doesn't return nonce while refreshing token
-            // https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse
-            let id_token = issue_id_token(
-                &wallet.address,
-                &app_state.config.issuer_url,
-                app_state.config.client_secret.clone(),
-                None,
-                "",
-                &app_state.config.client_id,
-                app_state.config.token_timeout,
-            )?;
-            new_refresh_token.save(&app_state.pool).await?;
-            log::info!(
-                "Issued new id_token and refresh token for user with id: {}",
-                refresh_token.wallet_id,
-            );
-            Ok(Json(JwtToken {
-                token: id_token.to_string(),
-                refresh_token: new_refresh_token.token,
-            }))
+            if let Some(ip_address) = conn_info.realip_remote_addr() {
+                if refresh_token.ip_address != ip_address {
+                    refresh_token.blacklist(&app_state.pool).await?;
+                    Err(ApiError::IpIncorrect)
+                } else {
+                    let mut new_refresh_token = RefreshToken::new(
+                        refresh_token.wallet_id,
+                        app_state.config.refresh_token_timeout,
+                        ip_address,
+                    );
+                    // Doesn't return nonce while refreshing id_token
+                    // https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse
+                    let id_token = issue_id_token(
+                        &wallet.address,
+                        &app_state.config.issuer_url,
+                        app_state.config.client_secret.clone(),
+                        None,
+                        "",
+                        &app_state.config.client_id,
+                        app_state.config.token_timeout,
+                    )?;
+                    new_refresh_token.save(&app_state.pool).await?;
+                    log::info!(
+                        "Issued new id_token and refresh token for user with id: {}",
+                        refresh_token.wallet_id,
+                    );
+                    Ok(Json(JwtToken {
+                        token: id_token.to_string(),
+                        refresh_token: new_refresh_token.token,
+                    }))
+                }
+            } else {
+                log::error!("Can't extract client ip address");
+                Err(ApiError::IpNotFound)
+            }
         } else {
             log::debug!(
                 "Wallet with id: {} assigned to token: {} not found",
