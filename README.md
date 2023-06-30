@@ -6,7 +6,7 @@ Avanguard is a microservice performing OIDC-like registration/sign-in with a web
 
 The repository contains 3 microservices:
 
-- **avanguard**: provides REST API allowing web3 message signing, validation and OIDC id token retrieval
+- **avanguard**: provides REST API allowing web3 message signing, validation and OIDC id token and refresh token retrieval
 - **web**: frontend application connecting the wallet, performing message signing and communicating with Avanguard and backend apis
 - **backend**: emulates client backend application, validates the token with HMAC algorithm
 
@@ -60,14 +60,28 @@ interface SignMessageRequest {
 
 interface LoginResponse {
   token: string;
+  refresh_token: string;
 }
 
 const login = (data: SignMessageRequest) =>
   client.post<LoginResponse>(`auth`, data);
 ```
 
-Response contains JWT token you can use for communication with your backend service.
+
+Response contains JWT token you can use for communication with your backend service and refresh token.
 It can be validated with HMAC algorithm by using the shared client secret.
+
+Refresh JWT token
+
+4. POST refresh token to `/refresh`
+
+```typescript
+interface RefreshTokenRequest {
+    refresh_token: string;
+}
+const refresh = (data: RefreshTokenRequest) =>
+  client.post<LoginResponse>(`refresh`, data);
+```
 
 ### Configuration
 
@@ -96,11 +110,16 @@ Options:
       --db-user <DB_USER>
           Database user [env: AG_DB_USER=] [default: avanguard]
       --db-password <DB_PASSWORD>
-          Database password [env: AG_DB_PASSWORD=avanguard] [default: ]
+          Database password [env: AG_DB_PASSWORD=] [default: ]
       --log-level <LOG_LEVEL>
           Log level [env: AG_LOG_LEVEL=] [default: INFO]
+      --token-timeout <TOKEN_TIMEOUT>
+          Token timeout [env: TOKEN_TIMEOUT=] [default: 14400]
+      --refresh-token-timeout <REFRESH_TOKEN_TIMEOUT>
+          Refresh token timeout [env: REFRESH_TOKEN_TIMEOUT=] [default: 86400]
   -h, --help
           Print help
+
 ```
 
 ### Development setup
