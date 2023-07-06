@@ -47,5 +47,4 @@ yarn-error.log*
 \*.tsbuildinfo
 next-env.d.ts
 
-/backend/target
-/avanguard/target
+target/

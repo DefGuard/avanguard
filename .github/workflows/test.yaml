@@ -32,12 +32,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - name: Debug
-        run: echo ${{ github.ref_name }}
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Cache
         uses: actions/cache@v3
         with:
@@ -68,5 +64,4 @@ jobs:
           AG_DB_USER: defguard
           AG_DB_PASSWORD: defguard
           DATABASE_URL: "postgresql://defguard:defguard@postgres/defguard"
-          SQLX_OFFLINE: true
         run: cargo test --locked --no-fail-fast
