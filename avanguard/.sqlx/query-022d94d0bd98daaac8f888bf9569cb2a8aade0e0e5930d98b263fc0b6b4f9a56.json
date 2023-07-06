@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE \"refreshtoken\" SET \"wallet_id\" = $2, \"token\" = $3, \"expires_at\" = $4, \"used_at\" = $5, \"blacklisted_at\" = $6 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8",
+        "Text",
+        "Timestamp",
+        "Timestamp",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "022d94d0bd98daaac8f888bf9569cb2a8aade0e0e5930d98b263fc0b6b4f9a56"
+}

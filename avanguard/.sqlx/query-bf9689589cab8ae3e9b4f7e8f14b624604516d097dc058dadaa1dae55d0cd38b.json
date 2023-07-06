@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM \"refreshtoken\" WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bf9689589cab8ae3e9b4f7e8f14b624604516d097dc058dadaa1dae55d0cd38b"
+}

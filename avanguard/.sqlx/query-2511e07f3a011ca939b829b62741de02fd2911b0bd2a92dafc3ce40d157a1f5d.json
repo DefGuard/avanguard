@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO \"wallet\" (\"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\") VALUES ($1, $2, $3, $4, $5) RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Timestamp",
+        "Timestamp"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2511e07f3a011ca939b829b62741de02fd2911b0bd2a92dafc3ce40d157a1f5d"
+}

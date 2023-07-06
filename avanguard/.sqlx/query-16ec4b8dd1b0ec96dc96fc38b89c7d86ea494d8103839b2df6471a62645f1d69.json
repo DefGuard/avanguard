@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id \"id?\", \"wallet_id\", \"token\", \"expires_at\", \"used_at\", \"blacklisted_at\" FROM \"refreshtoken\" WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id?",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "wallet_id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "expires_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 4,
+        "name": "used_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "blacklisted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "16ec4b8dd1b0ec96dc96fc38b89c7d86ea494d8103839b2df6471a62645f1d69"
+}

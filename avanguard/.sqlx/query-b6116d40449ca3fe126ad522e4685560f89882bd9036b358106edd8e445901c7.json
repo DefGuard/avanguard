@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE refreshtoken SET used_at = $2 WHERE token = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b6116d40449ca3fe126ad522e4685560f89882bd9036b358106edd8e445901c7"
+}
