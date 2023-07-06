@@ -48,10 +48,14 @@ jobs:
         run: |
           rustup component add rustfmt clippy
       - name: Lint Avanguard
+        env:
+          SQLX_OFFLINE: true
         working-directory: avanguard
         run: |
           cargo fmt -- --check && cargo clippy -- --deny warnings
       - name: Lint Backend
+        env:
+          SQLX_OFFLINE: true
         working-directory: backend
         run: |
           cargo fmt -- --check && cargo clippy -- --deny warnings
@@ -64,4 +68,5 @@ jobs:
           AG_DB_USER: defguard
           AG_DB_PASSWORD: defguard
           DATABASE_URL: "postgresql://defguard:defguard@postgres/defguard"
+          SQLX_OFFLINE: true
         run: cargo test --locked --no-fail-fast

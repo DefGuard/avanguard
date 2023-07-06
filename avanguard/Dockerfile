@@ -1,5 +1,6 @@
 FROM lukemathwalker/cargo-chef:0.1.61-rust-1.70 AS chef
 WORKDIR /build
+ENV SQLX_OFFLINE true
 
 FROM chef AS planner
 COPY . .
