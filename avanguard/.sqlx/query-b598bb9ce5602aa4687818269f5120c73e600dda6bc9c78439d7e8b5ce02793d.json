@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id \"id?\", \"address\", \"challenge_message\", \"challenge_signature\", \"creation_timestamp\", \"validation_timestamp\" FROM \"wallet\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id?",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "challenge_message",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "challenge_signature",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "creation_timestamp",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "validation_timestamp",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "b598bb9ce5602aa4687818269f5120c73e600dda6bc9c78439d7e8b5ce02793d"
+}

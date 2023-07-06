@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE refreshtoken SET blacklisted_at = $2 WHERE token = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b163bf460c560ebc46e2e2c83d61d3057bbe4db146d5b35c4bf8be79751a397e"
+}

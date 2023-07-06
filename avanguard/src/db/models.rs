@@ -1,5 +1,5 @@
 use chrono::{Duration, NaiveDateTime, Utc};
-use ethers::types::transaction::eip712::{Eip712, TypedData};
+use ethers_core::types::transaction::eip712::{Eip712, TypedData};
 use model_derive::Model;
 use secp256k1::{
     ecdsa::{RecoverableSignature, RecoveryId},
@@ -47,6 +47,9 @@ impl Wallet {
         let typed_data: TypedData = serde_json::from_str(message).map_err(|_| Web3Error::Decode)?;
         let hash_msg = typed_data.encode_eip712().map_err(|_| Web3Error::Decode)?;
         let message = Message::from_slice(&hash_msg).map_err(|_| Web3Error::InvalidMessage)?;
+        if signature_array.len() != 65 {
+            return Err(Web3Error::InvalidMessage);
+        }
         let id = match signature_array[64] {
             0 | 27 => 0,
             1 | 28 => 1,
@@ -93,6 +96,7 @@ impl Wallet {
     }
 
     /// Prepare challenge message using EIP-712 format
+    #[must_use]
     pub fn format_challenge(address: &str, challenge_message: &str) -> String {
         let nonce = to_lower_hex(&keccak256(address.as_bytes()));
 
