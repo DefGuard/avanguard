@@ -4,7 +4,7 @@ use openidconnect::url::Url;
 
 #[derive(Clone, Parser)]
 pub struct Config {
-    #[clap(
+    #[arg(
         long,
         env = "AG_ISSUER_URL",
         value_parser = Url::parse,
@@ -13,7 +13,7 @@ pub struct Config {
     )]
     pub issuer_url: Url,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_CLIENT_ID",
         default_value = "client_id",
@@ -21,7 +21,7 @@ pub struct Config {
     )]
     pub client_id: String,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_CLIENT_SECRET",
         default_value = "client_secret",
@@ -29,7 +29,7 @@ pub struct Config {
     )]
     pub client_secret: String,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_CLIENT_ORIGIN_URL",
         default_value = "http://localhost:8000",
@@ -37,7 +37,7 @@ pub struct Config {
     )]
     pub client_origin_url: String,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_LISTEN_PORT",
         default_value_t = 8080,
@@ -45,7 +45,7 @@ pub struct Config {
     )]
     pub listen_port: u16,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_DB_HOST",
         default_value = "localhost",
@@ -53,7 +53,7 @@ pub struct Config {
     )]
     pub db_host: String,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_DB_PORT",
         default_value_t = 5432,
@@ -61,7 +61,7 @@ pub struct Config {
     )]
     pub db_port: u16,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_DB_NAME",
         default_value = "avanguard",
@@ -69,7 +69,7 @@ pub struct Config {
     )]
     pub db_name: String,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_DB_USER",
         default_value = "avanguard",
@@ -77,7 +77,7 @@ pub struct Config {
     )]
     pub db_user: String,
 
-    #[clap(
+    #[arg(
         long,
         env = "AG_DB_PASSWORD",
         default_value = "",
@@ -85,7 +85,7 @@ pub struct Config {
     )]
     pub db_password: String,
 
-    #[clap(long, env = "AG_LOG_LEVEL", default_value_t = LevelFilter::Info, help = "Log level")]
+    #[arg(long, env = "AG_LOG_LEVEL", default_value_t = LevelFilter::Info, help = "Log level")]
     pub log_level: LevelFilter,
 
     #[arg(
@@ -96,7 +96,7 @@ pub struct Config {
     )]
     pub token_timeout: u32,
 
-    #[clap(
+    #[arg(
         long,
         env = "REFRESH_TOKEN_TIMEOUT",
         default_value_t = 3600 * 24,

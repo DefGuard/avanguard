@@ -25,7 +25,7 @@ impl ApiError {
             Self::Sqlx(_) => "DB",
             Self::WalletNotFound => "WalletNotFound",
             Self::SignatureIncorrect => "SignatureIncorrect",
-            Self::SigningError(_) => "SignatureIncorrect",
+            Self::SigningError(_) => "SigningError",
             Self::TokenNotFound => "TokenNotFound",
         }
     }
@@ -67,10 +67,10 @@ impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::Sqlx(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::WalletNotFound => StatusCode::UNAUTHORIZED,
-            ApiError::SignatureIncorrect => StatusCode::UNAUTHORIZED,
-            ApiError::SigningError(_) => StatusCode::UNAUTHORIZED,
-            ApiError::TokenNotFound => StatusCode::UNAUTHORIZED,
+            ApiError::WalletNotFound
+            | ApiError::SignatureIncorrect
+            | ApiError::SigningError(_)
+            | ApiError::TokenNotFound => StatusCode::UNAUTHORIZED,
         }
     }
 }

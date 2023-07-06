@@ -3,11 +3,12 @@ use avanguard::{
     config_service,
     crypto::keccak256,
     db::{init_db, DbPool, RefreshToken, Wallet},
+    hex::to_lower_hex,
     state::AppState,
     Challenge, Config, JwtToken, WalletAddress, WalletSignature, CHALLENGE_TEMPLATE,
 };
 use clap::Parser;
-use ethers::types::transaction::eip712::{Eip712, TypedData};
+use ethers_core::types::transaction::eip712::{Eip712, TypedData};
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use secp256k1::{rand::rngs::OsRng, Message, Secp256k1};
 use serde::{Deserialize, Serialize};
@@ -40,7 +41,7 @@ async fn init_test_db() -> (DbPool, Config) {
         .await
         .expect("Failed to connect to Postgres");
     let db_name = Uuid::new_v4().to_string();
-    query(&format!("CREATE DATABASE \"{}\"", db_name))
+    query(&format!("CREATE DATABASE \"{db_name}\""))
         .execute(&pool)
         .await
         .expect("Failed to create test database");
@@ -61,20 +62,6 @@ async fn test_challenge_signing() {
     let secp = Secp256k1::new();
     let (secret_key, public_key) = secp.generate_keypair(&mut OsRng);
 
-    pub fn to_lower_hex(bytes: &[u8]) -> String {
-        let mut hex = String::with_capacity(bytes.len() + 2);
-        let to_char = |nibble: u8| -> char {
-            (match nibble {
-                0..=9 => b'0' + nibble,
-                _ => nibble + b'a' - 10,
-            }) as char
-        };
-        bytes.iter().for_each(|byte| {
-            hex.push(to_char(*byte >> 4));
-            hex.push(to_char(*byte & 0xf));
-        });
-        hex
-    }
     // Derive wallet address from public key
     let public_key = public_key.serialize_uncompressed();
     let hash = keccak256(&public_key[1..]);
@@ -91,7 +78,7 @@ async fn test_challenge_signing() {
     )
     .await;
 
-    let mut wallet = Wallet::new(wallet_address.to_owned());
+    let mut wallet = Wallet::new(wallet_address.clone());
     wallet.save(&pool).await.unwrap();
 
     // Retrieve challenge from API, ensure it's correct
@@ -120,12 +107,11 @@ async fn test_challenge_signing() {
 }},
 "primaryType": "ProofOfOwnership",
 "message": {{
-    "wallet": "{}",
-    "content": "{}",
-    "nonce": "{}"
+    "wallet": "{wallet_address}",
+    "content": "{CHALLENGE_TEMPLATE}",
+    "nonce": "{nonce}"
 }}}}
 "#,
-        wallet_address, CHALLENGE_TEMPLATE, nonce,
     )
     .chars()
     .filter(|c| c != &'\r' && c != &'\n' && c != &'\t')

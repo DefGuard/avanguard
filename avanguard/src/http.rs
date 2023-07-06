@@ -72,14 +72,14 @@ pub async fn web3auth_start(
 ) -> Result<Json<Challenge>, ApiError> {
     // Create wallet if it does not exist yet
     let address = data.into_inner().address.to_lowercase();
-    let mut wallet = match Wallet::find_by_address(&app_state.pool, &address).await? {
-        Some(wallet) => wallet,
-        None => {
+    let mut wallet =
+        if let Some(wallet) = Wallet::find_by_address(&app_state.pool, &address).await? {
+            wallet
+        } else {
             let mut wallet = Wallet::new(address);
             wallet.save(&app_state.pool).await?;
             wallet
-        }
-    };
+        };
     wallet.save(&app_state.pool).await?;
     Ok(Json(Challenge {
         challenge: wallet.challenge_message,
@@ -148,10 +148,7 @@ pub async fn web3auth_end(
     signature: Json<WalletSignature>,
 ) -> Result<Json<JwtToken>, ApiError> {
     let address = signature.address.to_lowercase();
-    let mut wallet = match Wallet::find_by_address(&app_state.pool, &address).await? {
-        Some(wallet) => wallet,
-        None => return Err(ApiError::WalletNotFound),
-    };
+    let Some(mut wallet) = Wallet::find_by_address(&app_state.pool, &address).await? else { return Err(ApiError::WalletNotFound) };
     match wallet.verify_address(&wallet.challenge_message, &signature.signature) {
         Ok(true) => {
             let id_token = issue_id_token(
