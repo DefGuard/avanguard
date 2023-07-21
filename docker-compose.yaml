@@ -25,6 +25,8 @@ services:
       AG_DB_USER: avanguard
       AG_DB_PASSWORD: avanguard
       AG_DB_NAME: avanguard
+      AG_LOG_LEVEL: debug
+      AG_CLIENT_ORIGIN_URL: http://localhost:8000
 
   db:
     image: postgres:15.1-alpine3.17

@@ -4,11 +4,11 @@
 
 Avanguard is a microservice performing OIDC-like registration/sign-in with a web3 wallet.
 
-The repository contains 3 microservices:
+The repository contains Avanguard microservice and 2 example projects:
 
 - **avanguard**: provides REST API allowing web3 message signing, validation and OIDC id token retrieval
-- **web**: frontend application connecting the wallet, performing message signing and communicating with Avanguard and backend apis
-- **backend**: emulates client backend application, validates the token with HMAC algorithm
+- **web**: example frontend application connecting the wallet, performing message signing and communicating with Avanguard and backend apis
+- **backend**: example backend application, validates the token with HMAC algorithm
 
 ## How does it work?
 
